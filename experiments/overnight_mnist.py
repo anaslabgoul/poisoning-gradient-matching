@@ -77,11 +77,12 @@ def statistics(root, trials):
     return result
 
 
-def configuration(output, cases, epochs, budget):
+def configuration(output, cases, epochs, budget, attack_loss='similarity'):
     return argparse.Namespace(output=str(output),data='~/data',dataset='MNIST',model='LeNet',
         cases=cases,seeds=[70000],clean_controls=False,surrogate_seed=314159,
         epochs=epochs,attack_iterations=250,restarts=8,poison_batch=512,eps=32.,
-        budget=budget,radius=32.,calibration_ratio=.1,precision='fp32',threads=4,benchmark=0)
+        budget=budget,radius=32.,calibration_ratio=.1,precision='fp32',threads=4,benchmark=0,
+        attack_loss=attack_loss)
 
 
 def study(root, trials, epochs):
@@ -105,23 +106,28 @@ def study(root, trials, epochs):
         selection=json.loads(selection_path.read_text())
     else:
         development=[]
-        for budget in [.01,.04]:
-            status('development',poison_budget=budget,source_accuracy=accuracy)
-            dev=Comparison(configuration(root/('development-'+str(budget)),dev_cases,epochs,budget))
+        for budget,attack_loss in [(.01,'similarity'),(.04,'similarity'),(.04,'SE')]:
+            status('development',poison_budget=budget,attack_loss=attack_loss,source_accuracy=accuracy)
+            dev=Comparison(configuration(root/('development-'+str(budget)+'-'+attack_loss),
+                                          dev_cases,epochs,budget,attack_loss))
+            dev.args.loss=attack_loss
             outcomes=[]
             for i,case in enumerate(dev.cases):
                 delta=dev.brew(case,state)
                 result,_=dev.fit('development-'+str(i),'standard',60000+i,0.,case,delta)
                 outcomes.append(result['attack_success'])
-            development.append(dict(budget=budget,successes=sum(outcomes),trials=3,outcomes=outcomes))
+            development.append(dict(budget=budget,attack_loss=attack_loss,
+                                    successes=sum(outcomes),trials=3,outcomes=outcomes))
             del dev
             if sum(outcomes)>=1:
                 break
-        selection=dict(selected_budget=development[-1]['budget'],development=development,
-            rule='First budget in [0.01,0.04] with at least one success in three disjoint development cases; otherwise retain 0.04 and flag weak baseline.',
+        selection=dict(selected_budget=development[-1]['budget'],selected_loss=development[-1]['attack_loss'],
+            development=development,
+            rule='First setting in [(0.01,cosine),(0.04,cosine),(0.04,squared-gradient)] with >=1 success in three disjoint development cases; otherwise flag weak baseline.',
             weak_development_baseline=sum(development[-1]['outcomes'])==0)
         write_json(selection_path,selection)
-    main=Comparison(configuration(root/'main',main_cases,epochs,selection['selected_budget']))
+    main=Comparison(configuration(root/'main',main_cases,epochs,selection['selected_budget'],selection['selected_loss']))
+    main.args.loss=selection['selected_loss']
     for filename in ['weights.json','calibration.json']:
         if not (main.out/filename).exists():
             shutil.copyfile(prep.out/filename,main.out/filename)
@@ -152,7 +158,7 @@ def study(root, trials, epochs):
 
 def main():
     parser=argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('--output',default='artifacts/mnist-lenet-25')
+    parser.add_argument('--output',default='artifacts/mnist-lenet-25-study')
     parser.add_argument('--trials',type=int,default=25)
     parser.add_argument('--epochs',type=int,default=20)
     args=parser.parse_args()

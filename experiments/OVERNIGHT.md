@@ -4,7 +4,7 @@ Run in remote tmux; no local computer or SSH connection needs to stay on:
 
 ```bash
 cd ~/poisoning-gradient-matching
-tmux new-session -d -s mnist-defense-25 'cd ~/poisoning-gradient-matching && ~/.venvs/witches-brew/bin/python -u experiments/overnight_mnist.py > artifacts/mnist-lenet-25.log 2>&1'
+tmux new-session -d -s mnist-defense-25 'cd ~/poisoning-gradient-matching && ~/.venvs/witches-brew/bin/python -u experiments/overnight_mnist.py > artifacts/mnist-lenet-25-study.log 2>&1'
 ```
 
 Default study: MNIST 28x28 grayscale, LeNet (61,706 parameters), full 60,000
@@ -14,7 +14,7 @@ poison subset and fresh victim seed. Four methods share exactly the same poison,
 initial weights, batch order, and spatial augmentations within each case:
 standard training, random perturbation augmentation, prediction consistency,
 and final-layer gradient consistency. Thus 25 victim trainings per method,
-100 reported victim trainings total. One clean surrogate and three or six
+100 reported victim trainings total. One clean surrogate and three to nine
 development victim trainings are additional preparation, excluded from statistics.
 
 Digit augmentation uses translations, never horizontal/vertical flips. FP32
@@ -22,8 +22,9 @@ training/penalties, TF32 CUDA enabled. Defense perturbation radius 32/255.
 Weights are calibrated once on clean training data, not test attack outcomes.
 
 Fixed, non-adaptive gradient-matching attack: epsilon 32/255, 250 iterations,
-eight restarts, poison batch 512. A development-only budget grid tries 1% then
-4%; select the first setting with at least one success in three development
+eight restarts, poison batch 512. A development-only grid tries 1% cosine, then
+4% cosine, then 4% squared-gradient matching (a repo option for small models);
+select the first setting with at least one success in three development
 cases. Main cases have independent, disjoint seeds and are never filtered by
 attack success. If both development settings fail, retain the 4% setting,
 flag a weak baseline, and report all main outcomes honestly. Clean surrogate
@@ -49,9 +50,9 @@ training restarts. A commit/config mismatch is rejected to prevent mixed results
 Check tomorrow:
 
 ```bash
-cat artifacts/mnist-lenet-25/status.json
-cat artifacts/mnist-lenet-25/statistics.json
-tail -30 artifacts/mnist-lenet-25.log
+cat artifacts/mnist-lenet-25-study/status.json
+cat artifacts/mnist-lenet-25-study/statistics.json
+tail -30 artifacts/mnist-lenet-25-study.log
 tmux attach -t mnist-defense-25
 ```
 
