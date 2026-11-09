@@ -69,8 +69,11 @@ def paired_defense_loss(model, inputs, labels, loss_fn, method='standard',
         regularizer = classification.detach() * 0
     elif method == 'prediction-consistency':
         # KL(p(original) || p(perturbed)), with gradients through both arguments.
+        # log_target avoids log(0) in the target derivative when softmax
+        # underflows; unlike a detached teacher, both branches still get gradients.
         regularizer = F.kl_div(perturbed_outputs.float().log_softmax(dim=1),
-                              outputs.float().softmax(dim=1), reduction='batchmean')
+                              outputs.float().log_softmax(dim=1),
+                              log_target=True, reduction='batchmean')
         loss = classification + weight * regularizer
     else:
         if len(captured) != 1 or captured[0].shape[0] != both_outputs.shape[0]:

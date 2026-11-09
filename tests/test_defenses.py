@@ -73,6 +73,19 @@ class DefenseTests(unittest.TestCase):
         self.assertTrue(torch.isfinite(model[0].weight.grad).all())
         self.assertGreater(model[0].weight.grad.abs().sum().item(), 0)
 
+    def test_prediction_consistency_is_finite_with_underflowed_probabilities(self):
+        model = torch.nn.Linear(4, 3)
+        with torch.no_grad():
+            model.weight[0].fill_(1000)
+            model.weight[1].fill_(-1000)
+            model.weight[2].zero_()
+        x, y = torch.ones(4, 4)*.5, torch.tensor([0, 1, 2, 0])
+        criterion = lambda model, outputs, labels: F.cross_entropy(outputs, labels)
+        _, loss, _ = paired_defense_loss(model, x, y, criterion, 'prediction-consistency')
+        loss.backward()
+        self.assertTrue(torch.isfinite(loss))
+        self.assertTrue(torch.isfinite(model.weight.grad).all())
+
 
 if __name__ == '__main__':
     unittest.main()
