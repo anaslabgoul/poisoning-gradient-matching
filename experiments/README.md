@@ -1,5 +1,21 @@
 # Paired-view defense comparison
 
+## Evaluation across the target class
+
+[`results/dog-group-evaluation.json`](results/dog-group-evaluation.json) records
+an inference-only evaluation of the four saved victims on all 1,000 CIFAR-10
+test dogs. The intended wrong class is frog, matching the existing attack.
+It also records all-10,000-image test accuracy and matched clean-control
+dog-to-frog confusion rates. The 999 dogs not used in poison construction
+are reported separately. These data measure **class-wide transfer of the
+single-image poisons**, not a poison optimization designed to attack all dogs.
+
+Re-evaluate the saved checkpoints without any training:
+
+```bash
+python experiments/evaluate_target_group.py
+```
+
 This experiment implements the three objectives in the user's November 2026
 gradient-stability proposal, alongside ordinary training. It is an initial
 **fixed-poison** evaluation, not evidence of robustness to defense-aware attacks.
