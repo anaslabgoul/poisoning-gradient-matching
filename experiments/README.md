@@ -45,15 +45,44 @@ chosen training objective to **both** clean surrogate training and victim traini
 it does not automatically adapt the poison objective to a defense. Use the
 comparison runner to hold standard poisons fixed across defenses.
 
-## Default pilot protocol
+## Requested four-model comparison
+
+The default runner now trains **four poisoned-data victim models**, one per
+technique, using one case (2000000000) and one initialization (1729). A separate
+clean surrogate is needed to create the poisons and calibrate the penalties;
+it is cached and reused. No per-method clean controls or extra victim seeds are
+run unless explicitly selected. Use `--clean-controls` to opt into clean controls.
+
+Measured results for the first four matched models are saved in
+[`results/four-model-comparison.json`](results/four-model-comparison.json).
+Those saved models were evaluated on 9,997 non-target test images (the original
+expanded pilot excluded three preselected targets). The attack target is scored
+separately. The attack has one target image, so the per-model observed success
+fraction is 0/1 or 1/1; it is not the paper's average across many target cases.
+All additional experiment runs were stopped at the user's scope correction.
+
+To run the four-model workflow from scratch:
+
+```bash
+python -u experiments/compare_defenses.py --precision bf16 --poison-batch 512 --output artifacts/four-model-comparison
+```
+
+## Expanded pilot protocol (opt-in)
+
+The larger pilot below is **not** the default. To request it explicitly:
+
+```bash
+python -u experiments/compare_defenses.py --cases 2000000000 2100000000 2110000000 --seeds 1729 1730 --clean-controls --precision bf16 --poison-batch 512 --output artifacts/expanded-defense-comparison
+```
 
 * Full CIFAR-10, CIFAR-adapted ResNet18, 40 epochs, batch size 128.
 * Repository SGD/Nesterov 0.9, weight decay 0.0005, LR 0.1, drops at 14/24/35.
 * Cases 2000000000, 2100000000, 2110000000; victim seeds 1729 and 1730.
 * Independent clean surrogate, seed 314159, reused for brewing all three cases.
 * 1% training poison budget (500 images), epsilon 16/255, 250 iterations,
-  eight restarts, single brewing model. Poison minibatch 128, base tau 0.1;
-  the repo scales the effective Adam LR by pbatch/512, making it 0.025 here.
+  eight restarts, single brewing model. The measured four-model comparison
+  used poison batch 512 (all 500 poisons together), with effective Adam LR 0.1.
+  A preliminary batch-128 optimization was discarded before victim evaluation.
 * Defense radius 16/255. Each regularizer's lambda is calibrated once on the
   first 1024 **clean training** examples using the independent trained surrogate,
   to make its mean weighted penalty 10% of mean CE. Coefficients are frozen

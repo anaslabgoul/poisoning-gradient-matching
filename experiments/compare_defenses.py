@@ -289,6 +289,7 @@ class Comparison:
 
     def summarize(self):
         records = [json.loads(path.read_text()) for path in sorted((self.out/'runs').glob('*.json'))]
+        expected_clean = len(self.config.seeds) if self.config.clean_controls else 0
         summary = []
         for method in METHODS:
             clean = [r for r in records if r['method'] == method and not r['poisoned'] and r['name'] != 'surrogate']
@@ -310,11 +311,11 @@ class Comparison:
                 max_peak_gpu_gib=max(r['peak_gpu_bytes'] for r in poisoned)/1024**3))
         result = dict(evaluation=self.manifest['evaluation'], summary=summary,
                       expected_poisoned_runs_per_method=len(self.config.cases)*len(self.config.seeds),
-                      expected_clean_runs_per_method=len(self.config.seeds),
+                      expected_clean_runs_per_method=expected_clean,
                       complete=all(sum(r['method']==m and r['poisoned'] for r in records)
                                    ==len(self.config.cases)*len(self.config.seeds)
                                    and sum(r['method']==m and not r['poisoned'] and r['name']!='surrogate'
-                                           for r in records)==len(self.config.seeds) for m in METHODS),
+                                           for r in records)==expected_clean for m in METHODS),
                       records=records)
         write_json(self.out/'results.json', result)
         return result
@@ -327,9 +328,10 @@ class Comparison:
             return
         _, state = self.fit('surrogate', 'standard', self.config.surrogate_seed, 0.)
         weights = self.calibrate(state)
-        for seed in self.config.seeds:
-            for method in METHODS:
-                self.fit('clean-{}-{}'.format(seed, method), method, seed, weights[method])
+        if self.config.clean_controls:
+            for seed in self.config.seeds:
+                for method in METHODS:
+                    self.fit('clean-{}-{}'.format(seed, method), method, seed, weights[method])
         for case in self.cases:
             delta = self.brew(case, state)
             for seed in self.config.seeds:
@@ -345,13 +347,14 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--output', default='artifacts/defense-comparison')
     parser.add_argument('--data', default='~/data')
-    parser.add_argument('--cases', nargs='+', type=int, default=[2000000000, 2100000000, 2110000000])
-    parser.add_argument('--seeds', nargs='+', type=int, default=[1729, 1730])
+    parser.add_argument('--cases', nargs='+', type=int, default=[2000000000])
+    parser.add_argument('--seeds', nargs='+', type=int, default=[1729])
+    parser.add_argument('--clean-controls', action='store_true', help='Additionally train each method on clean data.')
     parser.add_argument('--surrogate-seed', type=int, default=314159)
     parser.add_argument('--epochs', type=int, default=40)
     parser.add_argument('--attack-iterations', type=int, default=250)
     parser.add_argument('--restarts', type=int, default=8)
-    parser.add_argument('--poison-batch', type=int, default=128)
+    parser.add_argument('--poison-batch', type=int, default=512)
     parser.add_argument('--eps', type=float, default=16.)
     parser.add_argument('--budget', type=float, default=.01)
     parser.add_argument('--radius', type=float, default=16.)
