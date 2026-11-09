@@ -90,6 +90,12 @@ def options():
     parser.add_argument('--gradient_noise', default=None, type=float, help='Add custom gradient noise during training.')
     parser.add_argument('--gradient_clip', default=None, type=float, help='Add custom gradient clip during training.')
 
+    # Paired-view training defenses (radius in 0--255 pixel units).
+    parser.add_argument('--defense', default='standard', choices=[
+        'standard', 'random-augmentation', 'prediction-consistency', 'gradient-consistency'])
+    parser.add_argument('--defense_radius', default=16., type=float)
+    parser.add_argument('--defense_weight', default=1., type=float)
+
     # Optionally, datasets can be stored as LMDB or within RAM:
     parser.add_argument('--lmdb_path', default=None, type=str)
     parser.add_argument('--cache_dataset', action='store_true', help='Cache the entire thing :>')

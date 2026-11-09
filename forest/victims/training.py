@@ -5,6 +5,7 @@ import torch
 
 import datetime
 from .utils import print_and_save_stats, pgd_step
+from .defenses import paired_defense_loss
 
 from ..consts import NON_BLOCKING, BENCHMARK, DEBUG_TRAINING
 torch.backends.cudnn.benchmark = BENCHMARK
@@ -100,8 +101,11 @@ def run_step(kettle, poison_delta, loss_fn, epoch, stats, model, defs, criterion
                               eps=kettle.args.eps, tau=kettle.args.tau)
 
         # Get loss
-        outputs = model(inputs)
-        loss = loss_fn(model, outputs, labels)
+        outputs, loss, _ = paired_defense_loss(
+            model, inputs, labels, loss_fn,
+            method=getattr(kettle.args, 'defense', 'standard'),
+            radius=getattr(kettle.args, 'defense_radius', 16.),
+            weight=getattr(kettle.args, 'defense_weight', 1.), dm=kettle.dm, ds=kettle.ds)
         if DEBUG_TRAINING:
             forward_timer_end.record()
             backward_timer_start.record()
