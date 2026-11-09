@@ -17,7 +17,11 @@ def get_model(model_name, dataset_name, pretrained=False):
             raise ValueError('Loading pretrained models is only supported for ImageNet.')
         in_channels = 1 if dataset_name == 'MNIST' else 3
         num_classes = 10 if dataset_name in ['CIFAR10', 'MNIST'] else 100
-        if 'ResNet' in model_name:
+        if model_name == 'LeNet':
+            if dataset_name != 'MNIST':
+                raise ValueError('LeNet is configured for 28x28 MNIST images.')
+            model = lenet()
+        elif 'ResNet' in model_name:
             model = resnet_picker(model_name, dataset_name)
         elif 'efficientnet-b' in model_name.lower():
             from efficientnet_pytorch import EfficientNet
@@ -77,6 +81,17 @@ def get_model(model_name, dataset_name, pretrained=False):
                 raise NotImplementedError(f'ImageNet model {model_name} not found at torchvision.models.')
 
     return model
+
+
+def lenet():
+    """Small 61,706-parameter digit classifier with a Linear final head."""
+    return torch.nn.Sequential(OrderedDict([
+        ('conv1', torch.nn.Conv2d(1, 6, 5, padding=2)), ('tanh1', torch.nn.Tanh()),
+        ('pool1', torch.nn.AvgPool2d(2)), ('conv2', torch.nn.Conv2d(6, 16, 5)),
+        ('tanh2', torch.nn.Tanh()), ('pool2', torch.nn.AvgPool2d(2)),
+        ('flatten', torch.nn.Flatten()), ('fc1', torch.nn.Linear(400, 120)),
+        ('tanh3', torch.nn.Tanh()), ('fc2', torch.nn.Linear(120, 84)),
+        ('tanh4', torch.nn.Tanh()), ('fc3', torch.nn.Linear(84, 10))]))
 
 
 def linear_model(dataset, num_classes=10):

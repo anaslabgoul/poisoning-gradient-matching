@@ -65,6 +65,9 @@ class Comparison:
         self.device = torch.device('cuda:0')
         self.setup = dict(device=self.device, dtype=torch.float32, non_blocking=True)
         self.args = forest.options().parse_args([])
+        self.args.dataset = getattr(config, 'dataset', 'CIFAR10')
+        self.model_name = getattr(config, 'model', 'ResNet18')
+        self.args.net = [self.model_name]
         self.args.data_path = str(Path(config.data).expanduser())
         self.args.epochs = config.epochs
         self.args.attackiter = config.attack_iterations
@@ -78,14 +81,17 @@ class Comparison:
         self.kettle = forest.Kettle(self.args, batch_size=128, augmentations='default', setup=self.setup)
         self.dm, self.ds = self.kettle.dm, self.kettle.ds
         train = self.kettle.trainset
-        self.images = torch.tensor(train.data, device=self.device).permute(0, 3, 1, 2).float() / 255
+        def image_tensor(data):
+            tensor = torch.as_tensor(data, device=self.device).float()/255
+            return tensor[:, None] if tensor.ndim == 3 else tensor.permute(0, 3, 1, 2)
+        self.images = image_tensor(train.data)
         self.images = ((self.images - self.dm) / self.ds).contiguous(memory_format=torch.channels_last)
         self.labels = torch.tensor(train.targets, device=self.device, dtype=torch.long)
         # Keep the full un-subsetted test data. The same target union is excluded
         # from accuracy for every clean and poisoned run, including all methods.
         test = self.kettle.validset.dataset
         self.full_validset = test
-        self.test_images = torch.tensor(test.data, device=self.device).permute(0, 3, 1, 2).float() / 255
+        self.test_images = image_tensor(test.data)
         self.test_images = ((self.test_images - self.dm) / self.ds).contiguous(memory_format=torch.channels_last)
         self.test_labels = torch.tensor(test.targets, device=self.device, dtype=torch.long)
         self.cases = []
@@ -100,6 +106,7 @@ class Comparison:
         self.accuracy_mask = torch.ones(len(self.test_labels), dtype=torch.bool, device=self.device)
         self.accuracy_mask[[case['target_id'] for case in self.cases]] = False
         self.manifest = dict(config=vars(config), cases=self.cases,
+                             dataset=self.args.dataset, model=self.model_name,
                              evaluation='fixed standard-gradient-matching poisons; not defense-aware',
                              torch=torch.__version__, torchvision=__import__('torchvision').__version__,
                              gpu=torch.cuda.get_device_name(), tf32=True,
@@ -143,7 +150,18 @@ class Comparison:
                         target_correct=int(predictions[case['target_id']] == case['true_label']),
                         intended_probability=probabilities[case['target_id']][case['intended_label']])
                    for case in self.cases]
-        return dict(clean_test_accuracy=correct / total, clean_test_loss=loss_sum / total, targets=targets)
+        label_list = self.test_labels.tolist()
+        for target in targets:
+            group = [i for i, label in enumerate(label_list) if label == target['true_label']]
+            unseen = [i for i in group if i != target['target_id']]
+            target['group_size'] = len(group)
+            target['group_intended_count'] = sum(predictions[i] == target['intended_label'] for i in group)
+            target['group_intended_rate'] = target['group_intended_count']/len(group)
+            target['unseen_group_size'] = len(unseen)
+            target['unseen_group_intended_rate'] = sum(predictions[i] == target['intended_label'] for i in unseen)/len(unseen)
+        full_accuracy = sum(p == y for p, y in zip(predictions, label_list))/len(label_list)
+        return dict(clean_test_accuracy=correct / total, full_test_accuracy=full_accuracy,
+                    clean_test_loss=loss_sum / total, targets=targets)
 
     def fit(self, name, method, seed, weight, case=None, delta=None, max_batches=None):
         result_path = self.out / 'runs' / (name + '.json')
@@ -151,8 +169,8 @@ class Comparison:
         if result_path.exists() and model_path.exists():
             return json.loads(result_path.read_text()), load_state(model_path)
         seed_all(seed)
-        model = get_model('ResNet18', 'CIFAR10').to(self.device, memory_format=torch.channels_last)
-        defs = training_strategy('ResNet18', self.args)
+        model = get_model(self.model_name, self.args.dataset).to(self.device, memory_format=torch.channels_last)
+        defs = training_strategy(self.model_name, self.args)
         optimizer, scheduler = get_optimizers(model, self.args, defs)
         shuffle = torch.Generator(device=self.device).manual_seed(seed + 100)
         aug_rng = torch.Generator(device=self.device).manual_seed(seed + 200)
@@ -224,7 +242,7 @@ class Comparison:
         path = self.out / 'weights.json'
         if path.exists():
             return json.loads(path.read_text())
-        model = get_model('ResNet18', 'CIFAR10').to(self.device, memory_format=torch.channels_last)
+        model = get_model(self.model_name, self.args.dataset).to(self.device, memory_format=torch.channels_last)
         model.load_state_dict(state)
         model.eval()
         weights = {'standard': 0., 'random-augmentation': 0.}
@@ -347,6 +365,8 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--output', default='artifacts/defense-comparison')
     parser.add_argument('--data', default='~/data')
+    parser.add_argument('--dataset', choices=['CIFAR10', 'MNIST'], default='CIFAR10')
+    parser.add_argument('--model', default='ResNet18')
     parser.add_argument('--cases', nargs='+', type=int, default=[2000000000])
     parser.add_argument('--seeds', nargs='+', type=int, default=[1729])
     parser.add_argument('--clean-controls', action='store_true', help='Additionally train each method on clean data.')
