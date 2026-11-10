@@ -7,8 +7,10 @@ the GPU to avoid repeated image decoding on a shared network home directory.
 
 import argparse
 from collections import defaultdict
-from contextlib import nullcontext
+import copy
+from contextlib import nullcontext, redirect_stdout
 import hashlib
+import io
 import json
 from pathlib import Path
 import random
@@ -79,7 +81,13 @@ class Comparison:
         self.args.eps = config.eps
         self.args.loss = getattr(config, 'attack_loss', 'similarity')
         self.args.cache_dataset = False
-        self.kettle = forest.Kettle(self.args, batch_size=128, augmentations='default', setup=self.setup)
+        if getattr(config, 'fixed_cases', None) is not None:
+            # Kettle's bootstrap random setup is replaced below. Do not print
+            # those transient IDs as if they were the preregistered targets.
+            with redirect_stdout(io.StringIO()):
+                self.kettle = forest.Kettle(self.args, batch_size=128, augmentations='default', setup=self.setup)
+        else:
+            self.kettle = forest.Kettle(self.args, batch_size=128, augmentations='default', setup=self.setup)
         self.dm, self.ds = self.kettle.dm, self.kettle.ds
         train = self.kettle.trainset
         original_train_indices = None
@@ -104,14 +112,32 @@ class Comparison:
         self.test_images = ((self.test_images - self.dm) / self.ds).contiguous(memory_format=torch.channels_last)
         self.test_labels = torch.tensor(test.targets, device=self.device, dtype=torch.long)
         self.cases = []
-        for key in config.cases:
-            self.args.poisonkey = str(key)
-            self.kettle.validset = self.full_validset
-            self.kettle.random_construction()
-            self.cases.append(dict(key=key, target_id=int(self.kettle.target_ids[0]),
-                                   true_label=int(self.kettle.poison_setup['target_class']),
-                                   intended_label=int(self.kettle.poison_setup['intended_class'][0]),
-                                   poison_ids=self.kettle.poison_ids.tolist()))
+        if getattr(config, 'fixed_cases', None) is not None:
+            self.cases = copy.deepcopy(config.fixed_cases)
+            if [c['key'] for c in self.cases] != config.cases:
+                raise ValueError('Fixed case keys do not match configuration.')
+            for case in self.cases:
+                ids = torch.tensor(case['poison_ids'], device=self.device)
+                if (not 0 <= case['target_id'] < len(self.test_labels) or len(ids) == 0 or
+                        int(ids.min()) < 0 or int(ids.max()) >= len(self.labels)):
+                    raise ValueError('Fixed case contains an out-of-range image ID.')
+                if (case['true_label'] == case['intended_label'] or
+                        int(self.test_labels[case['target_id']]) != case['true_label'] or
+                        len(set(case['poison_ids'])) != len(ids) or
+                        not bool((self.labels[ids] == case['intended_label']).all())):
+                    raise ValueError('Invalid fixed target, intended label, or poison IDs.')
+            print(json.dumps(dict(event='fixed_cases_loaded',cases=len(self.cases),
+                target_ids=sorted({c['target_id'] for c in self.cases}),
+                train_images=len(self.labels),poisons_per_case=[len(c['poison_ids']) for c in self.cases])),flush=True)
+        else:
+            for key in config.cases:
+                self.args.poisonkey = str(key)
+                self.kettle.validset = self.full_validset
+                self.kettle.random_construction()
+                self.cases.append(dict(key=key, target_id=int(self.kettle.target_ids[0]),
+                                       true_label=int(self.kettle.poison_setup['target_class']),
+                                       intended_label=int(self.kettle.poison_setup['intended_class'][0]),
+                                       poison_ids=self.kettle.poison_ids.tolist()))
         self.accuracy_mask = torch.ones(len(self.test_labels), dtype=torch.bool, device=self.device)
         self.accuracy_mask[[case['target_id'] for case in self.cases]] = False
         self.manifest = dict(config=vars(config), cases=self.cases,
@@ -288,6 +314,17 @@ class Comparison:
         torch.cuda.empty_cache()
         return weights
 
+    def configure_fixed_case(self, case):
+        from forest.data.datasets import Subset
+        self.kettle.poison_ids = torch.tensor(case['poison_ids'], dtype=torch.long)
+        self.kettle.target_ids = np.asarray([case['target_id']])
+        self.kettle.poison_setup = dict(poison_budget=self.args.budget, target_num=1,
+            poison_class=case['intended_label'], target_class=case['true_label'],
+            intended_class=[case['intended_label']])
+        self.kettle.poison_lookup = {idx: row for row, idx in enumerate(case['poison_ids'])}
+        self.kettle.poisonset = Subset(self.kettle.trainset, case['poison_ids'])
+        self.kettle.targetset = Subset(self.full_validset, [case['target_id']])
+
     def brew(self, case, state):
         path = self.out / 'poisons' / (str(case['key']) + '.pt')
         info_path = path.with_suffix('.json')
@@ -296,7 +333,10 @@ class Comparison:
         seed_all(case['key'])
         self.args.poisonkey = str(case['key'])
         self.kettle.validset = self.full_validset
-        self.kettle.random_construction()
+        if getattr(self.config, 'fixed_cases', None) is not None:
+            self.configure_fixed_case(case)
+        else:
+            self.kettle.random_construction()
         assert self.kettle.poison_ids.tolist() == case['poison_ids']
         assert int(self.kettle.target_ids[0]) == case['target_id']
         ids = self.kettle.poison_ids.to(self.device)
@@ -305,6 +345,10 @@ class Comparison:
                                                               num_workers=0, shuffle=False)
         victim = forest.Victim(self.args, setup=self.setup)
         victim.model.load_state_dict(state)
+        # Victim construction resets RNGs to the surrogate seed. Fixed-grid
+        # repetitions must reseed *after* that reset to vary actual poison noise.
+        if 'poison_seed' in case:
+            seed_all(case['poison_seed'])
         witch = forest.Witch(self.args, setup=self.setup)
         torch.cuda.reset_peak_memory_stats()
         started = time.perf_counter()
