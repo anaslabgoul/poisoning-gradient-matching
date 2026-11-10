@@ -1338,5 +1338,5 @@
   "metric": "Exact intended wrong-label prediction on the fixed target after training from scratch.",
   "randomness": "Victim seed s; independent attack-optimization seed s+1000000 and poison-selection seed s+2000000. Reseed after surrogate construction.",
   "uncertainty": "Per-target Wilson intervals; overall two-way target/seed bootstrap after all 100 cells complete. Conditional on one fixed source model.",
-  "clean_controls": "No extra per-seed clean models; clean surrogate predictions are reported separately and are not matched counterfactual controls."
+  "clean_controls": "Ten clean reference models, one per victim seed, shared across all ten targets; 100 poisoned victims plus ten clean references. No defenses."
 }

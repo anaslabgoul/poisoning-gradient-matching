@@ -93,7 +93,7 @@ def lock(args):
         metric='Exact intended wrong-label prediction on the fixed target after training from scratch.',
         randomness='Victim seed s; independent attack-optimization seed s+1000000 and poison-selection seed s+2000000. Reseed after surrogate construction.',
         uncertainty='Per-target Wilson intervals; overall two-way target/seed bootstrap after all 100 cells complete. Conditional on one fixed source model.',
-        clean_controls='No extra per-seed clean models; clean surrogate predictions are reported separately and are not matched counterfactual controls.')
+        clean_controls='Ten clean reference models, one per victim seed, shared across all ten targets; 100 poisoned victims plus ten clean references. No defenses.')
     write_json(Path(args.plan),plan)
     print(json.dumps(dict(seeds=seeds,targets=targets,planned_runs=len(runs)),indent=2))
 
@@ -147,9 +147,15 @@ def prepare(args):
     if evaluation['full_test_accuracy']<.75:
         raise RuntimeError('Fixed source has less than 75% clean test accuracy on this host')
     write_json(root/'source-evaluation.json',evaluation)
+    del model
+    torch.cuda.empty_cache()
+    for seed in plan['seeds']:
+        write_json(root/'status/prepare.json',dict(phase='clean_reference',seed=seed))
+        experiment.fit('clean-seed-'+str(seed),'standard',seed,0.)
     write_json(root/'ready.json',dict(plan_sha256=sha256(args.plan),
         git_commit=experiment.manifest['git_commit'],source_sha256=sha256(root/'inputs/source.pt'),
         clean_source_accuracy=evaluation['full_test_accuracy'],prepared_unix=time.time()))
+    write_json(root/'status/prepare.json',dict(phase='complete',clean_references=10,source_reused=True))
     print(json.dumps(dict(event='prepared',source_accuracy=evaluation['full_test_accuracy'],runs=100)),flush=True)
 
 
@@ -181,11 +187,14 @@ def run_target(args):
         result,_=experiment.fit('standard-seed-'+str(case['victim_seed']),'standard',
                                 case['victim_seed'],0.,case,delta)
         target=next(t for t in result['targets'] if t['case_key']==case['key'])
+        clean=json.loads((root/'preparation/runs'/('clean-seed-'+str(case['victim_seed'])+'.json')).read_text())
+        clean_target=next(t for t in clean['targets'] if t['target_id']==case['target_id'])
         record=dict(run_index=case['run_index'],target_index=args.target_index,
             target_id=case['target_id'],true_label=case['true_label'],intended_label=case['intended_label'],
             victim_seed=case['victim_seed'],poison_seed=case['poison_seed'],selection_seed=case['selection_seed'],
             poison_ids_sha256=case['poison_ids_sha256'],poison_file_sha256=meta['sha256'],
             attack_success=target['attack_success'],target=target,
+            clean_target=clean_target,clean_reference_accuracy=clean['full_test_accuracy'],
             clean_test_accuracy=result['full_test_accuracy'],training_seconds=result['train_seconds'],
             poison_generation_seconds=meta['seconds'],peak_gpu_bytes=max(result['peak_gpu_bytes'],meta['peak_gpu_bytes']),
             model_path=str((experiment.out/'models'/('standard-seed-'+str(case['victim_seed'])+'.pt')).resolve()))
@@ -211,6 +220,9 @@ def summarize(args):
         successes=sum(r['attack_success'] for r in rows)
         per_target.append(dict(**target,completed=len(rows),expected=10,successes=successes,
             asr=successes/len(rows) if rows else None,
+            clean_correct=sum(r['clean_target']['target_correct'] for r in rows),
+            clean_intended_errors=sum(r['clean_target']['attack_success'] for r in rows),
+            successes_on_clean_correct=sum(r['attack_success'] and r['clean_target']['target_correct'] for r in rows),
             wilson_95ci=wilson(successes,len(rows)) if rows else None,
             mean_accuracy=float(np.mean([r['clean_test_accuracy'] for r in rows])) if rows else None))
     per_seed=[]
@@ -222,6 +234,9 @@ def summarize(args):
     complete=len(records)==100
     overall=dict(completed=len(records),expected=100,successes=successes,
         asr=successes/len(records) if records else None,
+        clean_correct=sum(r['clean_target']['target_correct'] for r in records),
+        clean_intended_errors=sum(r['clean_target']['attack_success'] for r in records),
+        successes_on_clean_correct=sum(r['attack_success'] and r['clean_target']['target_correct'] for r in records),
         mean_accuracy=float(np.mean([r['clean_test_accuracy'] for r in records])) if records else None)
     if complete:
         matrix=np.asarray([[by_index[t*10+s]['attack_success'] for s in range(10)] for t in range(10)],dtype=float)
@@ -230,6 +245,11 @@ def summarize(args):
         seeds=rng.integers(0,10,size=(10000,10))
         draws=matrix[targets[:,:,None],seeds[:,None,:]].mean(axis=(1,2))
         overall['two_way_target_seed_bootstrap_95ci']=np.quantile(draws,[.025,.975]).tolist()
+        clean_matrix=np.asarray([[by_index[t*10+s]['clean_target']['attack_success'] for s in range(10)] for t in range(10)],dtype=float)
+        differences=matrix-clean_matrix
+        difference_draws=differences[targets[:,:,None],seeds[:,None,:]].mean(axis=(1,2))
+        overall['asr_difference_vs_clean']=float(differences.mean())
+        overall['asr_difference_two_way_bootstrap_95ci']=np.quantile(difference_draws,[.025,.975]).tolist()
         overall['matrix']=matrix.astype(int).tolist()
     result=dict(complete=complete,overall=overall,per_target=per_target,per_seed=per_seed,
         definition=plan['metric'],uncertainty=plan['uncertainty'],records=sorted(records,key=lambda r:r['run_index']))

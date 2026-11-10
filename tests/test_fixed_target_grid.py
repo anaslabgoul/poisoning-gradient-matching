@@ -2,16 +2,50 @@
 from pathlib import Path
 from tempfile import TemporaryDirectory
 from types import SimpleNamespace
+import json
 import unittest
 from unittest.mock import Mock,patch
 import numpy as np
 import torch
 
 from experiments.compare_defenses import Comparison
-from experiments.fixed_target_grid import define_grid,index_hash
+from experiments.fixed_target_grid import define_grid,index_hash,summarize
 
 
 class FixedTargetGridTest(unittest.TestCase):
+    def test_summary_uses_target_seed_blocks_and_completed_denominators(self):
+        labels=np.repeat(np.arange(10),1000)
+        targets,seeds,runs,_=define_grid(labels,labels,[str(i) for i in range(10)])
+        with TemporaryDirectory() as directory:
+            root=Path(directory)
+            (root/'completed').mkdir()
+            plan=root/'plan.json'
+            plan.write_text(json.dumps(dict(files={},targets=targets,seeds=seeds,runs=runs,metric='test',uncertainty='test')))
+            args=SimpleNamespace(plan=str(plan),output=str(root))
+            for run in runs:
+                record={k:run[k] for k in ('run_index','target_index','target_id','victim_seed','poison_seed','poison_ids_sha256')}
+                record.update(attack_success=int(run['target_index']<5),
+                    clean_target={'target_correct':1,'attack_success':0},clean_test_accuracy=.8)
+                (root/'completed'/(str(run['run_index'])+'.json')).write_text(json.dumps(record))
+                if run['run_index']==0:
+                    with patch('builtins.print'):
+                        summarize(args)
+                    partial=json.loads((root/'summary.json').read_text())
+                    self.assertFalse(partial['complete'])
+                    self.assertEqual(partial['overall']['asr'],1.)
+                    self.assertEqual(partial['overall']['completed'],1)
+            with patch('builtins.print'):
+                summarize(args)
+            result=json.loads((root/'summary.json').read_text())
+            self.assertTrue(result['complete'])
+            self.assertEqual(result['overall']['successes'],50)
+            self.assertEqual(result['overall']['asr'],.5)
+            low,high=result['overall']['two_way_target_seed_bootstrap_95ci']
+            self.assertLessEqual(low,.3)
+            self.assertGreaterEqual(high,.7)
+            self.assertTrue(all(t['completed']==10 for t in result['per_target']))
+            self.assertTrue(all(s['successes']==5 for s in result['per_seed']))
+
     def test_ten_targets_ten_seeds_and_fresh_poison_subsets(self):
         labels=np.repeat(np.arange(10),1000)
         targets,seeds,runs,ids=define_grid(labels,labels,[str(i) for i in range(10)],excluded=[0,1000])
