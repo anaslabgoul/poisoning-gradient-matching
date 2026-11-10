@@ -82,6 +82,14 @@ class Comparison:
         self.kettle = forest.Kettle(self.args, batch_size=128, augmentations='default', setup=self.setup)
         self.dm, self.ds = self.kettle.dm, self.kettle.ds
         train = self.kettle.trainset
+        original_train_indices = None
+        if getattr(config, 'train_size', None) is not None:
+            from experiments.subsets import reduced_dataset
+            train, original_train_indices = reduced_dataset(train, config.train_size,
+                                                            getattr(config, 'subset_seed', 20261110))
+            self.kettle.trainset = train
+            self.kettle.trainloader = torch.utils.data.DataLoader(train, batch_size=128,
+                                                                shuffle=True, num_workers=0)
         def image_tensor(data):
             tensor = torch.as_tensor(data, device=self.device).float()/255
             return tensor[:, None] if tensor.ndim == 3 else tensor.permute(0, 3, 1, 2)
@@ -116,6 +124,13 @@ class Comparison:
                              batchnorm='paired views share a single training forward; one running-stat update',
                              gradient_penalty='mean per-example squared Frobenius norm; final weight only; no detach',
                              git_commit=subprocess.check_output(['git', 'rev-parse', 'HEAD'], text=True).strip())
+        if original_train_indices is not None:
+            self.manifest['training_subset'] = dict(
+                original_indices=original_train_indices.tolist(),
+                seed=getattr(config, 'subset_seed', 20261110),
+                class_counts={str(label): int((np.asarray(train.targets)==label).sum())
+                              for label in np.unique(train.targets)},
+                poison_id_space='Local subset row IDs; map to original rows through original_indices.')
         manifest_path = self.out / 'manifest.json'
         if manifest_path.exists():
             old = json.loads(manifest_path.read_text())
@@ -291,6 +306,7 @@ class Comparison:
         victim = forest.Victim(self.args, setup=self.setup)
         victim.model.load_state_dict(state)
         witch = forest.Witch(self.args, setup=self.setup)
+        torch.cuda.reset_peak_memory_stats()
         started = time.perf_counter()
         delta = witch.brew(victim, self.kettle).cpu()
         torch.cuda.synchronize()
@@ -300,6 +316,7 @@ class Comparison:
         path.parent.mkdir(parents=True, exist_ok=True)
         torch.save(dict(delta=delta, poison_ids=self.kettle.poison_ids, target_id=case['target_id']), path)
         write_json(info_path, dict(case_key=case['key'], seconds=time.perf_counter()-started,
+            peak_gpu_bytes=torch.cuda.max_memory_allocated(),
             matching_loss=witch.stat_optimal_loss, count=len(delta), pixel_linf=float(pixel_delta.abs().max()),
             sha256=hashlib.sha256(path.read_bytes()).hexdigest()))
         del victim, witch
@@ -368,6 +385,9 @@ def main():
     parser.add_argument('--data', default='~/data')
     parser.add_argument('--dataset', choices=['CIFAR10', 'MNIST'], default='CIFAR10')
     parser.add_argument('--model', default='ResNet18')
+    parser.add_argument('--train-size', type=int, default=None, help='Balanced training subset size; full test set retained.')
+    parser.add_argument('--subset-seed', type=int, default=20261110)
+    parser.add_argument('--attack-loss', choices=['similarity','SE'], default='similarity')
     parser.add_argument('--cases', nargs='+', type=int, default=[2000000000])
     parser.add_argument('--seeds', nargs='+', type=int, default=[1729])
     parser.add_argument('--clean-controls', action='store_true', help='Additionally train each method on clean data.')
