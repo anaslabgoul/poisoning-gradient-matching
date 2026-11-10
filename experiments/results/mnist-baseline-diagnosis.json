@@ -1,0 +1,255 @@
+{
+  "audited_cases": 25,
+  "audit": [
+    {
+      "case": 3100000000,
+      "count": 2400,
+      "pixel_linf": 0.1254902030162608,
+      "nonzero": 1157408
+    },
+    {
+      "case": 3100001009,
+      "count": 2400,
+      "pixel_linf": 0.1254902030162608,
+      "nonzero": 1184421
+    },
+    {
+      "case": 3100002018,
+      "count": 2400,
+      "pixel_linf": 0.1254902030162608,
+      "nonzero": 1247592
+    },
+    {
+      "case": 3100003027,
+      "count": 2400,
+      "pixel_linf": 0.1254902030162608,
+      "nonzero": 1211296
+    },
+    {
+      "case": 3100004036,
+      "count": 2400,
+      "pixel_linf": 0.1254902030162608,
+      "nonzero": 1276221
+    },
+    {
+      "case": 3100005045,
+      "count": 2400,
+      "pixel_linf": 0.1254902030162608,
+      "nonzero": 1230323
+    },
+    {
+      "case": 3100006054,
+      "count": 2400,
+      "pixel_linf": 0.1254902030162608,
+      "nonzero": 1227120
+    },
+    {
+      "case": 3100007063,
+      "count": 2400,
+      "pixel_linf": 0.1254902030162608,
+      "nonzero": 1269018
+    },
+    {
+      "case": 3100008072,
+      "count": 2400,
+      "pixel_linf": 0.1254902030162608,
+      "nonzero": 1347719
+    },
+    {
+      "case": 3100009081,
+      "count": 2400,
+      "pixel_linf": 0.1254902030162608,
+      "nonzero": 1131571
+    },
+    {
+      "case": 3100010090,
+      "count": 2400,
+      "pixel_linf": 0.1254902030162608,
+      "nonzero": 1249265
+    },
+    {
+      "case": 3100011099,
+      "count": 2400,
+      "pixel_linf": 0.1254902030162608,
+      "nonzero": 1253006
+    },
+    {
+      "case": 3100012108,
+      "count": 2400,
+      "pixel_linf": 0.1254902030162608,
+      "nonzero": 1230853
+    },
+    {
+      "case": 3100013117,
+      "count": 2400,
+      "pixel_linf": 0.1254902030162608,
+      "nonzero": 1192701
+    },
+    {
+      "case": 3100014126,
+      "count": 2400,
+      "pixel_linf": 0.1254902030162608,
+      "nonzero": 1266885
+    },
+    {
+      "case": 3100015135,
+      "count": 2400,
+      "pixel_linf": 0.1254902030162608,
+      "nonzero": 1190812
+    },
+    {
+      "case": 3100016144,
+      "count": 2400,
+      "pixel_linf": 0.1254902030162608,
+      "nonzero": 1202521
+    },
+    {
+      "case": 3100017153,
+      "count": 2400,
+      "pixel_linf": 0.1254902030162608,
+      "nonzero": 1188294
+    },
+    {
+      "case": 3100018162,
+      "count": 2400,
+      "pixel_linf": 0.1254902030162608,
+      "nonzero": 1330339
+    },
+    {
+      "case": 3100019171,
+      "count": 2400,
+      "pixel_linf": 0.1254902030162608,
+      "nonzero": 1178235
+    },
+    {
+      "case": 3100020180,
+      "count": 2400,
+      "pixel_linf": 0.1254902030162608,
+      "nonzero": 1160639
+    },
+    {
+      "case": 3100021189,
+      "count": 2400,
+      "pixel_linf": 0.1254902030162608,
+      "nonzero": 1240870
+    },
+    {
+      "case": 3100022198,
+      "count": 2400,
+      "pixel_linf": 0.1254902030162608,
+      "nonzero": 1378973
+    },
+    {
+      "case": 3100023207,
+      "count": 2400,
+      "pixel_linf": 0.1254902030162608,
+      "nonzero": 1287905
+    },
+    {
+      "case": 3100024216,
+      "count": 2400,
+      "pixel_linf": 0.1254902030162608,
+      "nonzero": 1230414
+    }
+  ],
+  "checked_case": {
+    "key": 3100000000,
+    "target_id": 3703,
+    "true_label": 2,
+    "intended_label": 7
+  },
+  "changed_training_rows": 2400,
+  "gradient_diagnostics": {
+    "clean": {
+      "target_gradient_norm": 34.515865325927734,
+      "poison_gradient_norm": 0.24237580597400665,
+      "cosine": 0.4192538261413574,
+      "squared_distance": 1184.388916015625,
+      "source_poison_image_accuracy": 0.9958333373069763
+    },
+    "poisoned": {
+      "target_gradient_norm": 34.515865325927734,
+      "poison_gradient_norm": 21.514501571655273,
+      "cosine": 0.6777962446212769,
+      "squared_distance": 647.5671997070312,
+      "source_poison_image_accuracy": 0.3700000047683716
+    }
+  },
+  "controls": {
+    "clean_new_initialization": {
+      "accuracy": 0.9941,
+      "target": {
+        "case_key": 3100000000,
+        "target_id": 3703,
+        "true_label": 2,
+        "intended_label": 7,
+        "predicted_label": 2,
+        "attack_success": 0,
+        "target_correct": 1,
+        "intended_probability": 0.0001397682208335027,
+        "group_size": 1032,
+        "group_intended_count": 2,
+        "group_intended_rate": 0.001937984496124031,
+        "unseen_group_size": 1031,
+        "unseen_group_intended_rate": 0.0019398642095053346
+      }
+    },
+    "bounded_poison_new_initialization": {
+      "accuracy": 0.9927,
+      "target": {
+        "case_key": 3100000000,
+        "target_id": 3703,
+        "true_label": 2,
+        "intended_label": 7,
+        "predicted_label": 2,
+        "attack_success": 0,
+        "target_correct": 1,
+        "intended_probability": 0.000481451308587566,
+        "group_size": 1032,
+        "group_intended_count": 2,
+        "group_intended_rate": 0.001937984496124031,
+        "unseen_group_size": 1031,
+        "unseen_group_intended_rate": 0.0019398642095053346
+      }
+    },
+    "bounded_poison_source_initialization": {
+      "accuracy": 0.9935,
+      "target": {
+        "case_key": 3100000000,
+        "target_id": 3703,
+        "true_label": 2,
+        "intended_label": 7,
+        "predicted_label": 2,
+        "attack_success": 0,
+        "target_correct": 1,
+        "intended_probability": 0.00010678348917281255,
+        "group_size": 1032,
+        "group_intended_count": 2,
+        "group_intended_rate": 0.001937984496124031,
+        "unseen_group_size": 1031,
+        "unseen_group_intended_rate": 0.0019398642095053346
+      }
+    },
+    "unbounded_target_insertion_positive_control": {
+      "accuracy": 0.9932,
+      "target": {
+        "case_key": 3100000000,
+        "target_id": 3703,
+        "true_label": 2,
+        "intended_label": 7,
+        "predicted_label": 7,
+        "attack_success": 1,
+        "target_correct": 0,
+        "intended_probability": 0.9985145926475525,
+        "group_size": 1032,
+        "group_intended_count": 5,
+        "group_intended_rate": 0.0048449612403100775,
+        "unseen_group_size": 1031,
+        "unseen_group_intended_rate": 0.0038797284190106693
+      }
+    }
+  },
+  "poisoned_vs_clean_parameter_l2": 7.214805007393212,
+  "warning": "Positive control violates the epsilon bound and clean-label semantic constraint; it is only a pipeline diagnostic.",
+  "interpretation": "All saved poisons were nonzero and within the epsilon bound. One-case clean, bounded-poison and deliberately invalid positive-control trainings verify application and scoring. Bounded optimization failed even with the source initialization. This does not identify the precise cause of the attack failure or establish inherent MNIST/LeNet robustness."
+}

@@ -85,6 +85,16 @@ def configuration(output, cases, epochs, budget, attack_loss='similarity'):
         attack_loss=attack_loss)
 
 
+def require_viable_baseline(selection):
+    """Never launch the defense study after a failed development baseline."""
+    development = selection.get('development', [])
+    chosen = development[-1] if development else {}
+    if chosen.get('trials', 0) < 3 or chosen.get('successes', 0) < 2:
+        raise RuntimeError('Undefended attack failed the development gate: require at least '
+                           '2/3 successes before launching the defense comparison. '
+                           'Keep these pilot failures; improve the attack configuration first.')
+
+
 def study(root, trials, epochs):
     dev_cases=[1000000000,1100000000,1110000000]
     main_cases=[3100000000+1009*i for i in range(trials)]
@@ -119,13 +129,14 @@ def study(root, trials, epochs):
             development.append(dict(budget=budget,attack_loss=attack_loss,
                                     successes=sum(outcomes),trials=3,outcomes=outcomes))
             del dev
-            if sum(outcomes)>=1:
+            if sum(outcomes)>=2:
                 break
         selection=dict(selected_budget=development[-1]['budget'],selected_loss=development[-1]['attack_loss'],
             development=development,
-            rule='First setting in [(0.01,cosine),(0.04,cosine),(0.04,squared-gradient)] with >=1 success in three disjoint development cases; otherwise flag weak baseline.',
-            weak_development_baseline=sum(development[-1]['outcomes'])==0)
+            rule='First setting in [(0.01,cosine),(0.04,cosine),(0.04,squared-gradient)] with >=2 successes in three disjoint development cases; otherwise STOP before main trials.',
+            weak_development_baseline=sum(development[-1]['outcomes'])<2)
         write_json(selection_path,selection)
+    require_viable_baseline(selection)
     main=Comparison(configuration(root/'main',main_cases,epochs,selection['selected_budget'],selection['selected_loss']))
     main.args.loss=selection['selected_loss']
     for filename in ['weights.json','calibration.json']:

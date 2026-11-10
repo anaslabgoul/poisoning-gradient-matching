@@ -11,6 +11,35 @@ The primary 95% Wilson interval is 0--13.32% for each method; degenerate paired
 ASR bootstrap intervals do not establish equivalence. Full raw measurements
 remain in `artifacts/mnist-lenet-25-study/statistics.json` on liparis and locally.
 
+### Baseline diagnostics and budget tuning
+
+`results/mnist-baseline-diagnosis.json` records an audit of all 25 poison tensors
+and three additional one-case standard-training controls. All 2,400 selected
+training rows changed in the checked case; saved IDs/labels/bounds matched in
+all 25 cases. Clean target 2 stayed 2; bounded poison stayed 2 even when the
+victim used the source initialization. A deliberately invalid positive control
+(inserting the target with wrong label, outside the noise bound) changed it to
+7 with probability 0.998515. This verifies the basic training/scoring path,
+not attack effectiveness under the required constraints. The exact reason for
+the bounded attack's failure is not yet established.
+
+`experiments/tune_standard_budget.py` runs only standard-training development
+cases across explicitly requested budgets/objectives, with matched targets and
+seeds and clean controls. It records actual poison counts because the single-
+class threat model cannot use more poisons than that class contains (about 10%
+on MNIST). Example maximum-budget diagnostic:
+
+```bash
+python experiments/tune_standard_budget.py --output artifacts/mnist-standard-budget-max --budgets .10 --losses similarity SE --source artifacts/mnist-lenet-25-study/preparation/models/surrogate.pt
+```
+
+The [paper's Table 2](https://arxiv.org/html/2009.02276v2#S5.T2) reports 86.25%
+targeted success on CIFAR-10 with its 6-layer ConvNet, 1% budget and epsilon
+32/255. Its ConvNet has widths 64,128,128,256,256 and a linear head (`ConvNet64`
+in this repo), and uses 40 epochs. These are reference settings, not a promise
+that changing MNIST's poison fraction alone will reproduce that success.
+Keep development selection separate from a new independent final evaluation.
+
 Run in remote tmux; no local computer or SSH connection needs to stay on:
 
 ```bash
@@ -35,10 +64,14 @@ Weights are calibrated once on clean training data, not test attack outcomes.
 Fixed, non-adaptive gradient-matching attack: epsilon 32/255, 250 iterations,
 eight restarts, poison batch 512. A development-only grid tries 1% cosine, then
 4% cosine, then 4% squared-gradient matching (a repo option for small models);
-select the first setting with at least one success in three development
+select the first setting with at least two successes in three development
 cases. Main cases have independent, disjoint seeds and are never filtered by
-attack success. If all three development settings fail, retain the final 4% squared-gradient setting,
-flag a weak baseline, and report all main outcomes honestly. Clean surrogate
+attack success. If all three development settings fail this operational quality
+gate, STOP before any main/defended runs. The completed historical run did not
+enforce this gate and incorrectly proceeded after all nine pilot failures.
+Those results are preserved, not relabeled as a successful benchmark. A 2/3
+development pass is a screening rule, not an estimate of final attack success.
+Clean surrogate
 accuracy must exceed 97.5%; otherwise stop with a visible failed status rather
 than launching a misleading study. This is a new MNIST experiment, not a
 reproduction of the CIFAR-10 numerical results in Witches' Brew.

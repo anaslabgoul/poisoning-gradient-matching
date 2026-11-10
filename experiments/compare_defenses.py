@@ -77,6 +77,7 @@ class Comparison:
         self.args.modelkey = config.surrogate_seed
         self.args.budget = config.budget
         self.args.eps = config.eps
+        self.args.loss = getattr(config, 'attack_loss', 'similarity')
         self.args.cache_dataset = False
         self.kettle = forest.Kettle(self.args, batch_size=128, augmentations='default', setup=self.setup)
         self.dm, self.ds = self.kettle.dm, self.kettle.ds

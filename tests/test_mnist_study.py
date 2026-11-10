@@ -6,6 +6,13 @@ from forest.victims.defenses import METHODS, paired_defense_loss
 
 
 class MNISTStudyTest(unittest.TestCase):
+    def test_failed_development_stops_study(self):
+        from experiments.overnight_mnist import require_viable_baseline
+        for successes in (0, 1):
+            with self.assertRaisesRegex(RuntimeError, 'development gate'):
+                require_viable_baseline({'development': [{'trials': 3, 'successes': successes}]})
+        require_viable_baseline({'development': [{'trials': 3, 'successes': 2}]})
+
     def test_uncertainty_for_zero_or_all_successes(self):
         from experiments.overnight_mnist import wilson,mean_ci
         low,high=wilson(0,25)
