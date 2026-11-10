@@ -8,7 +8,8 @@ from .optimization_strategy import training_strategy
 from ..utils import average_dicts
 from ..consts import BENCHMARK, SHARING_STRATEGY
 torch.backends.cudnn.benchmark = BENCHMARK
-torch.multiprocessing.set_sharing_strategy(SHARING_STRATEGY)
+if SHARING_STRATEGY in torch.multiprocessing.get_all_sharing_strategies():
+    torch.multiprocessing.set_sharing_strategy(SHARING_STRATEGY)
 
 
 class _VictimBase:

@@ -19,7 +19,9 @@ from .diff_data_augmentation import RandomTransform
 from ..consts import PIN_MEMORY, BENCHMARK, DISTRIBUTED_BACKEND, SHARING_STRATEGY, MAX_THREADING
 from ..utils import set_random_seed
 torch.backends.cudnn.benchmark = BENCHMARK
-torch.multiprocessing.set_sharing_strategy(SHARING_STRATEGY)
+# Windows supports file_system rather than the Linux file_descriptor strategy.
+if SHARING_STRATEGY in torch.multiprocessing.get_all_sharing_strategies():
+    torch.multiprocessing.set_sharing_strategy(SHARING_STRATEGY)
 
 
 class Kettle():

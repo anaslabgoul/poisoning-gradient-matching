@@ -23,6 +23,7 @@ def run(args, root):
     def config(output, budget, loss):
         value = configuration(output, keys, args.epochs, budget, loss)
         value.dataset, value.model, value.eps = args.dataset, args.model, args.eps
+        value.precision = args.precision
         return value
 
     prep = Comparison(config(root/'preparation', args.budgets[0], args.losses[0]))
@@ -41,6 +42,7 @@ def run(args, root):
         clean[case['key']] = record
     write_json(root/'protocol.json', dict(dataset=args.dataset, model=args.model,
         parameters=sum(v.numel() for v in state.values()), epochs=args.epochs,
+        training_precision=args.precision, poison_optimization_precision='fp32',
         source=source, cases=identities, victim_seeds=[60000+i for i in range(len(keys))],
         requested_budgets=args.budgets, losses=args.losses, epsilon=args.eps,
         attack_iterations=250, restarts=8, poison_batch=512,
@@ -102,6 +104,7 @@ def main():
     parser.add_argument('--model', default='LeNet')
     parser.add_argument('--epochs', type=int, default=20)
     parser.add_argument('--eps', type=float, default=32.)
+    parser.add_argument('--precision', choices=['fp32','bf16'], default='fp32')
     parser.add_argument('--budgets', type=float, nargs='+', default=[.06,.10])
     parser.add_argument('--losses', nargs='+', choices=['similarity','SE'], default=['similarity'])
     parser.add_argument('--cases', type=int, nargs='+', default=[1000000000,1100000000,1110000000])
