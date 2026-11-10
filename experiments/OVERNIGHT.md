@@ -1,5 +1,16 @@
 # MNIST / LeNet overnight statistics
 
+## Completed run outcome
+
+The completed 100-victim run is summarized in
+[`results/mnist-lenet-25-summary.json`](results/mnist-lenet-25-summary.json).
+All four methods had 0/25 intended-target successes, including standard training.
+Consequently this configuration did **not** provide a useful defense-robustness
+comparison. The low observed success rates must not be attributed to defenses.
+The primary 95% Wilson interval is 0--13.32% for each method; degenerate paired
+ASR bootstrap intervals do not establish equivalence. Full raw measurements
+remain in `artifacts/mnist-lenet-25-study/statistics.json` on liparis and locally.
+
 Run in remote tmux; no local computer or SSH connection needs to stay on:
 
 ```bash
@@ -26,7 +37,7 @@ eight restarts, poison batch 512. A development-only grid tries 1% cosine, then
 4% cosine, then 4% squared-gradient matching (a repo option for small models);
 select the first setting with at least one success in three development
 cases. Main cases have independent, disjoint seeds and are never filtered by
-attack success. If both development settings fail, retain the 4% setting,
+attack success. If all three development settings fail, retain the final 4% squared-gradient setting,
 flag a weak baseline, and report all main outcomes honestly. Clean surrogate
 accuracy must exceed 97.5%; otherwise stop with a visible failed status rather
 than launching a misleading study. This is a new MNIST experiment, not a

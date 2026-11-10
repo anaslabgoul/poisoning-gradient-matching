@@ -1,0 +1,193 @@
+{
+  "status": "Complete: 100 victim trainings, 25 matched cases per method",
+  "dataset": "MNIST",
+  "model": "LeNet",
+  "parameters": 61706,
+  "epochs": 20,
+  "training_source_commit": "1ac3f8c6c62d0dc64829dd3d295a8990af4e47ea",
+  "selected_attack": {
+    "selected_budget": 0.04,
+    "selected_loss": "SE",
+    "development": [
+      {
+        "budget": 0.01,
+        "attack_loss": "similarity",
+        "successes": 0,
+        "trials": 3,
+        "outcomes": [
+          0,
+          0,
+          0
+        ]
+      },
+      {
+        "budget": 0.04,
+        "attack_loss": "similarity",
+        "successes": 0,
+        "trials": 3,
+        "outcomes": [
+          0,
+          0,
+          0
+        ]
+      },
+      {
+        "budget": 0.04,
+        "attack_loss": "SE",
+        "successes": 0,
+        "trials": 3,
+        "outcomes": [
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "rule": "First setting in [(0.01,cosine),(0.04,cosine),(0.04,squared-gradient)] with >=1 success in three disjoint development cases; otherwise flag weak baseline.",
+    "weak_development_baseline": true
+  },
+  "weights": {
+    "standard": 0.0,
+    "random-augmentation": 0.0,
+    "prediction-consistency": 0.41597761496780966,
+    "gradient-consistency": 0.034258321480441715
+  },
+  "wall_seconds": 5210.614881515503,
+  "interpretation": "The attack failed on all 25 undefended cases as well as all defended cases. This setup cannot rank poison-defense effectiveness. Zero observed successes is not a zero population success probability: Wilson 95% CI is 0 to 13.32% per method. Degenerate paired bootstrap ASR intervals [0,0] do not establish equivalence.",
+  "targeted_metric": "Fraction of independent single-target poisoning cases attaining the exact intended wrong label.",
+  "group_metric": "Within each case, fraction of OTHER test images of the source class predicted as intended label; then average across cases.",
+  "summaries": [
+    {
+      "method": "standard",
+      "trials": 25,
+      "successes": 0,
+      "targeted_asr": 0.0,
+      "targeted_asr_95ci": [
+        1.3877787807814457E-17,
+        0.13319225093904846
+      ],
+      "mean_clean_test_accuracy": 0.9937559999999999,
+      "accuracy_sd": 0.0005845796210383402,
+      "accuracy_mean_95ci": [
+        0.9935399999999999,
+        0.9939880000000001
+      ],
+      "mean_unseen_source_class_wrong_label_rate": 0.0005593643421918284,
+      "source_class_rate_mean_95ci": [
+        0.00024118694169917183,
+        0.0009274335383060897
+      ],
+      "paired_asr_difference_vs_standard": 0.0,
+      "paired_asr_difference_95ci": [
+        0.0,
+        0.0
+      ],
+      "paired_accuracy_difference_vs_standard": 0.0,
+      "paired_accuracy_difference_95ci": [
+        0.0,
+        0.0
+      ],
+      "mean_training_seconds": 11.744796319360029,
+      "peak_gpu_gib": 0.6179914474487305
+    },
+    {
+      "method": "random-augmentation",
+      "trials": 25,
+      "successes": 0,
+      "targeted_asr": 0.0,
+      "targeted_asr_95ci": [
+        1.3877787807814457E-17,
+        0.13319225093904846
+      ],
+      "mean_clean_test_accuracy": 0.9935240000000001,
+      "accuracy_sd": 0.0004993996395673533,
+      "accuracy_mean_95ci": [
+        0.993336,
+        0.9937199999999998
+      ],
+      "mean_unseen_source_class_wrong_label_rate": 0.0003600742202928586,
+      "source_class_rate_mean_95ci": [
+        0.00015644155109121764,
+        0.0005901214181848836
+      ],
+      "paired_asr_difference_vs_standard": 0.0,
+      "paired_asr_difference_95ci": [
+        0.0,
+        0.0
+      ],
+      "paired_accuracy_difference_vs_standard": -0.00023200000000000998,
+      "paired_accuracy_difference_95ci": [
+        -0.00044000000000000484,
+        -2.800000000001901E-05
+      ],
+      "mean_training_seconds": 14.586189462759066,
+      "peak_gpu_gib": 0.6577777862548828
+    },
+    {
+      "method": "prediction-consistency",
+      "trials": 25,
+      "successes": 0,
+      "targeted_asr": 0.0,
+      "targeted_asr_95ci": [
+        1.3877787807814457E-17,
+        0.13319225093904846
+      ],
+      "mean_clean_test_accuracy": 0.9939040000000001,
+      "accuracy_sd": 0.0005003998401278724,
+      "accuracy_mean_95ci": [
+        0.993712,
+        0.994104
+      ],
+      "mean_unseen_source_class_wrong_label_rate": 0.0005975407952245035,
+      "source_class_rate_mean_95ci": [
+        0.00028041825621720094,
+        0.0009611804513712218
+      ],
+      "paired_asr_difference_vs_standard": 0.0,
+      "paired_asr_difference_95ci": [
+        0.0,
+        0.0
+      ],
+      "paired_accuracy_difference_vs_standard": 0.00014800000000001035,
+      "paired_accuracy_difference_95ci": [
+        -6.399999999999295E-05,
+        0.0003521000000000255
+      ],
+      "mean_training_seconds": 15.205245072161778,
+      "peak_gpu_gib": 0.6254734992980957
+    },
+    {
+      "method": "gradient-consistency",
+      "trials": 25,
+      "successes": 0,
+      "targeted_asr": 0.0,
+      "targeted_asr_95ci": [
+        1.3877787807814457E-17,
+        0.13319225093904846
+      ],
+      "mean_clean_test_accuracy": 0.993908,
+      "accuracy_sd": 0.0004716283847833267,
+      "accuracy_mean_95ci": [
+        0.993728,
+        0.994096
+      ],
+      "mean_unseen_source_class_wrong_label_rate": 0.0006392322669670175,
+      "source_class_rate_mean_95ci": [
+        0.00031794392920910593,
+        0.000995783852254977
+      ],
+      "paired_asr_difference_vs_standard": 0.0,
+      "paired_asr_difference_95ci": [
+        0.0,
+        0.0
+      ],
+      "paired_accuracy_difference_vs_standard": 0.000152000000000001,
+      "paired_accuracy_difference_95ci": [
+        -4.000000000000004E-05,
+        0.0003239999999999955
+      ],
+      "mean_training_seconds": 17.15795208115771,
+      "peak_gpu_gib": 0.6254734992980957
+    }
+  ]
+}
