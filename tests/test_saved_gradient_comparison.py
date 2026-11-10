@@ -6,10 +6,18 @@ from types import SimpleNamespace
 import unittest
 from unittest.mock import patch
 
-from experiments.compare_saved_gradient import aggregate,frozen_cohort,run
+from experiments.compare_saved_gradient import aggregate,frozen_cohort,resolve_lambda,run
 
 
 class SavedGradientComparisonTest(unittest.TestCase):
+    def test_lambda_override_and_calibrated_default(self):
+        self.assertEqual(resolve_lambda(.001393,None),.001393)
+        self.assertEqual(resolve_lambda(.001393,.3),.3)
+        self.assertEqual(resolve_lambda(.001393,0.),0.)
+        for value in (-1.,float('nan'),float('inf')):
+            with self.assertRaises(ValueError):
+                resolve_lambda(.001393,value)
+
     def rows(self):
         return [dict(run_index=i,target_id=100+i//2,victim_seed=11001+i%2,
             poison_file_sha256='hash-'+str(i),attack_success=s,

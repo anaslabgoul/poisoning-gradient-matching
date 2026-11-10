@@ -5,6 +5,7 @@ never resumed. Only the 25 explicitly frozen baseline cells are evaluated.
 """
 import argparse
 import json
+import math
 from pathlib import Path
 import sys
 import time
@@ -16,6 +17,13 @@ sys.path.insert(0,str(Path(__file__).resolve().parents[1]))
 from experiments.compare_defenses import Comparison,load_state,write_json
 from experiments.fixed_target_grid import cases_for,index_hash,read_plan,sha256
 from experiments.search_efficient_conditions import configuration
+
+
+def resolve_lambda(calibrated, override):
+    weight = calibrated if override is None else override
+    if not math.isfinite(weight) or weight < 0:
+        raise ValueError('Lambda must be finite and nonnegative.')
+    return float(weight)
 
 
 def frozen_cohort(summary,expected=25):
@@ -103,6 +111,9 @@ def run(args):
     cohort=json.loads(Path(args.cohort).read_text())
     if cohort['expected']!=25:
         raise ValueError('This launch is limited to the 25 reported baseline runs.')
+    override=getattr(args,'lambda_weight',None)
+    if override is not None:
+        resolve_lambda(0.,override)
     baseline_root,plan=read_plan(argparse.Namespace(plan=args.plan,output=args.baseline))
     ready=json.loads((baseline_root/'ready.json').read_text())
     if sha256(args.plan)!=ready['plan_sha256']:
@@ -135,14 +146,18 @@ def run(args):
     config.seeds=plan['seeds']
     config.radius=cohort['radius']
     config.calibration_ratio=cohort['calibration_ratio']
+    # Include the override in the manifest so a resume cannot mix lambda values.
+    config.lambda_weight=override
     experiment=Comparison(config)
     if index_hash(experiment.manifest['training_subset']['original_indices'])!=plan['training_subset_ids_sha256']:
         raise RuntimeError('Training subset differs from baseline')
     state=load_state(baseline_root/'inputs/source.pt')
     weights=experiment.calibrate(state)
-    weight=weights['gradient-consistency']
+    weight=resolve_lambda(weights['gradient-consistency'],override)
     write_json(root/'protocol.json',dict(cohort=cohort,lambda_gradient=weight,
-        calibration='lambda * mean penalty = 0.1 * mean CE; first 1024 clean TRAINING images, frozen clean source; no test-outcome tuning.',
+        lambda_source='clean-training calibration' if override is None else 'fixed sweep value',
+        calibrated_reference_lambda=weights['gradient-consistency'],
+        calibration='Reference lambda * mean penalty = 0.1 * mean CE; first 1024 clean TRAINING images, frozen clean source. Explicit lambda overrides this reference for a sweep.',
         matched='Identical saved poison tensor, target, intended label, victim initialization seed, shuffle and spatial augmentation draws.',
         evaluation='Fixed standard-attack poisons, not adapted to the defense.',
         source_checkpoint_sha256=sha256(baseline_root/'inputs/source.pt'),
@@ -182,6 +197,8 @@ def main():
     parser.add_argument('--baseline',default='artifacts/fixed-targets-10x10')
     parser.add_argument('--output',default='artifacts/gradient-defense-25')
     parser.add_argument('--data',default='~/data')
+    parser.add_argument('--lambda-weight',type=float,default=None,
+                        help='Fixed nonnegative coefficient; otherwise use clean-training calibration.')
     args=parser.parse_args()
     try:
         run(args)

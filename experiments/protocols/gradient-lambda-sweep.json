@@ -1,0 +1,66 @@
+{
+  "name": "Frozen-poison gradient-consistency lambda sweep",
+  "runs_per_lambda": 25,
+  "expected_new_runs": 250,
+  "settings": [
+    {
+      "index": 0,
+      "lambda": 0.0,
+      "directory": "lambda-00"
+    },
+    {
+      "index": 1,
+      "lambda": 1e-05,
+      "directory": "lambda-01"
+    },
+    {
+      "index": 2,
+      "lambda": 0.0001,
+      "directory": "lambda-02"
+    },
+    {
+      "index": 3,
+      "lambda": 0.0003,
+      "directory": "lambda-03"
+    },
+    {
+      "index": 4,
+      "lambda": 0.001,
+      "directory": "lambda-04"
+    },
+    {
+      "index": 5,
+      "lambda": 0.003,
+      "directory": "lambda-05"
+    },
+    {
+      "index": 6,
+      "lambda": 0.01,
+      "directory": "lambda-06"
+    },
+    {
+      "index": 7,
+      "lambda": 0.03,
+      "directory": "lambda-07"
+    },
+    {
+      "index": 8,
+      "lambda": 0.1,
+      "directory": "lambda-08"
+    },
+    {
+      "index": 9,
+      "lambda": 0.3,
+      "directory": "lambda-09"
+    }
+  ],
+  "existing_reference": {
+    "lambda": 0.0013930363592617237,
+    "comparison": "artifacts/gradient-defense-25/comparison.json",
+    "comparison_sha256": "68e650e6c02074386bd79009e00ba7aeb96ad098e6d5be58680c6b1c9f3f4332"
+  },
+  "controls": "Lambda zero uses the same concatenated original/jittered views and BatchNorm statistics as the other sweep settings. The standard baseline remains single-view training.",
+  "fixed": "Identical 25 saved poison tensors, victim seeds, 60-epoch training, augmentation draws, CIFAR10 balanced 10k train / full 10k test, ResNet20, jitter radius32/255.",
+  "interpretation": "Exploratory hyperparameter sweep on the existing three fixed target images. Do not interpret the best test result as held-out evidence; a selected lambda needs new independent target/poison runs. Fixed standard-attack poisons; not a defense-adaptive evaluation.",
+  "execution": "Ten sequential Slurm array tasks, each with persistent tmux and an srun-managed GPU worker, 25 models per task. Independent tasks allow other lambda values to run if a setting fails."
+}
