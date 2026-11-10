@@ -1,0 +1,2489 @@
+{
+  "date": "2026-11-10",
+  "device": "NVIDIA GeForce RTX 3050 6GB Laptop GPU",
+  "torch": "2.8.0+cu128",
+  "diagnostic_implementation_commit": "918345e",
+  "original_training_commit": "1ac3f8c",
+  "original_standard": {
+    "trials": 25,
+    "successes": 0,
+    "correct_targets": 25,
+    "mean_intended_probability": 0.00036705535377222986,
+    "max_intended_probability": 0.003514573909342289
+  },
+  "alignment": [
+    {
+      "case_key": 3100000000,
+      "dataset": "MNIST",
+      "model": "LeNet",
+      "target_id": 3703,
+      "true_label": 2,
+      "intended_label": 7,
+      "count": 2400,
+      "fraction": 0.04,
+      "changed_rows": 2400,
+      "pixel_linf": 0.125490203499794,
+      "states": {
+        "source_trained": {
+          "target": {
+            "predicted_label": 2,
+            "true_label": 2,
+            "intended_label": 7,
+            "attack_success": 0,
+            "intended_probability": 0.00010619550448609516,
+            "intended_loss": 9.150228500366211,
+            "intended_minus_true_logit": -9.149834632873535
+          },
+          "target_gradient_norm": 34.515865325927734,
+          "alignment": {
+            "clean": {
+              "norm": 0.2424473613500595,
+              "cosine": 0.4192808270454407,
+              "dot_target": 3.5086593627929688,
+              "squared_distance": 1184.386474609375
+            },
+            "poisoned": {
+              "norm": 21.51592254638672,
+              "cosine": 0.6777982115745544,
+              "dot_target": 503.3605041503906,
+              "squared_distance": 647.558837890625
+            }
+          },
+          "clean_poison_subset_accuracy": 0.9958333333333333,
+          "perturbed_poison_subset_accuracy": 0.37,
+          "poison_increment_dot_target": 499.8519287109375,
+          "one_poison_only_step": {
+            "step_size": 0.0001,
+            "target": {
+              "predicted_label": 2,
+              "true_label": 2,
+              "intended_label": 7,
+              "attack_success": 0,
+              "intended_probability": 0.00011168694618390873,
+              "intended_loss": 9.099810600280762,
+              "intended_minus_true_logit": -9.099400520324707
+            },
+            "intended_loss_change": -0.05041790008544922
+          }
+        },
+        "victim_initial": {
+          "target": {
+            "predicted_label": 6,
+            "true_label": 2,
+            "intended_label": 7,
+            "attack_success": 0,
+            "intended_probability": 0.09421026706695557,
+            "intended_loss": 2.3622262477874756,
+            "intended_minus_true_logit": -0.04711079224944115
+          },
+          "target_gradient_norm": 1.7586922645568848,
+          "alignment": {
+            "clean": {
+              "norm": 1.6155461072921753,
+              "cosine": 0.7438737154006958,
+              "dot_target": 2.113529682159424,
+              "squared_distance": 1.4759283065795898
+            },
+            "poisoned": {
+              "norm": 1.5691581964492798,
+              "cosine": 0.7845404148101807,
+              "dot_target": 2.165069818496704,
+              "squared_distance": 1.225116491317749
+            }
+          },
+          "clean_poison_subset_accuracy": 0.0,
+          "perturbed_poison_subset_accuracy": 0.0,
+          "poison_increment_dot_target": 0.05153989791870117,
+          "one_poison_only_step": {
+            "step_size": 0.0001,
+            "target": {
+              "predicted_label": 6,
+              "true_label": 2,
+              "intended_label": 7,
+              "attack_success": 0,
+              "intended_probability": 0.09423066675662994,
+              "intended_loss": 2.3620095252990723,
+              "intended_minus_true_logit": -0.046904295682907104
+            },
+            "intended_loss_change": -0.0002167224884033203
+          }
+        },
+        "victim_clean_trained": {
+          "target": {
+            "predicted_label": 2,
+            "true_label": 2,
+            "intended_label": 7,
+            "attack_success": 0,
+            "intended_probability": 0.00013981509255245328,
+            "intended_loss": 8.875189781188965,
+            "intended_minus_true_logit": -8.874690055847168
+          },
+          "target_gradient_norm": 28.96971321105957,
+          "alignment": {
+            "clean": {
+              "norm": 0.3138526976108551,
+              "cosine": 0.3791810870170593,
+              "dot_target": 3.447598457336426,
+              "squared_distance": 832.4475708007812
+            },
+            "poisoned": {
+              "norm": 12.754261016845703,
+              "cosine": 0.5783017873764038,
+              "dot_target": 213.67514038085938,
+              "squared_distance": 574.565185546875
+            }
+          },
+          "clean_poison_subset_accuracy": 0.9945833333333334,
+          "perturbed_poison_subset_accuracy": 0.6279166666666667,
+          "poison_increment_dot_target": 210.2275390625,
+          "one_poison_only_step": {
+            "step_size": 0.0001,
+            "target": {
+              "predicted_label": 2,
+              "true_label": 2,
+              "intended_label": 7,
+              "attack_success": 0,
+              "intended_probability": 0.00014283701602835208,
+              "intended_loss": 8.853806495666504,
+              "intended_minus_true_logit": -8.853299140930176
+            },
+            "intended_loss_change": -0.021383285522460938
+          }
+        },
+        "victim_poison_trained": {
+          "target": {
+            "predicted_label": 2,
+            "true_label": 2,
+            "intended_label": 7,
+            "attack_success": 0,
+            "intended_probability": 0.00048103282460942864,
+            "intended_loss": 7.639575004577637,
+            "intended_minus_true_logit": -7.638692378997803
+          },
+          "target_gradient_norm": 31.957733154296875,
+          "alignment": {
+            "clean": {
+              "norm": 0.5407518148422241,
+              "cosine": 0.37467288970947266,
+              "dot_target": 6.47479772567749,
+              "squared_distance": 1008.6395263671875
+            },
+            "poisoned": {
+              "norm": 0.06581594794988632,
+              "cosine": 0.4234405755996704,
+              "dot_target": 0.8906345367431641,
+              "squared_distance": 1019.5198364257812
+            }
+          },
+          "clean_poison_subset_accuracy": 0.98875,
+          "perturbed_poison_subset_accuracy": 0.9991666666666666,
+          "poison_increment_dot_target": -5.584163665771484,
+          "one_poison_only_step": {
+            "step_size": 0.0001,
+            "target": {
+              "predicted_label": 2,
+              "true_label": 2,
+              "intended_label": 7,
+              "attack_success": 0,
+              "intended_probability": 0.0004810752288904041,
+              "intended_loss": 7.639486789703369,
+              "intended_minus_true_logit": -7.638604164123535
+            },
+            "intended_loss_change": -8.821487426757812e-05
+          }
+        }
+      }
+    },
+    {
+      "case_key": 2000000000,
+      "dataset": "CIFAR10",
+      "model": "ConvNet",
+      "target_id": 8745,
+      "true_label": 5,
+      "intended_label": 6,
+      "count": 500,
+      "fraction": 0.01,
+      "changed_rows": 500,
+      "pixel_linf": 0.125490203499794,
+      "states": {
+        "source_trained": {
+          "target": {
+            "predicted_label": 5,
+            "true_label": 5,
+            "intended_label": 6,
+            "attack_success": 0,
+            "intended_probability": 1.392550711898366e-05,
+            "intended_loss": 11.181788444519043,
+            "intended_minus_true_logit": -11.162592887878418
+          },
+          "target_gradient_norm": 121.66337585449219,
+          "alignment": {
+            "clean": {
+              "norm": 5.371598243713379,
+              "cosine": 0.3115595579147339,
+              "dot_target": 203.61251831054688,
+              "squared_distance": 14423.6044921875
+            },
+            "poisoned": {
+              "norm": 3.415327310562134,
+              "cosine": 0.7707264423370361,
+              "dot_target": 320.25244140625,
+              "squared_distance": 14173.134765625
+            }
+          },
+          "clean_poison_subset_accuracy": 0.926,
+          "perturbed_poison_subset_accuracy": 0.956,
+          "poison_increment_dot_target": 116.63992309570312,
+          "one_poison_only_step": {
+            "step_size": 0.0001,
+            "target": {
+              "predicted_label": 5,
+              "true_label": 5,
+              "intended_label": 6,
+              "attack_success": 0,
+              "intended_probability": 1.4384804671863094e-05,
+              "intended_loss": 11.149337768554688,
+              "intended_minus_true_logit": -11.129937171936035
+            },
+            "intended_loss_change": -0.03245067596435547
+          }
+        },
+        "victim_initial": {
+          "target": {
+            "predicted_label": 9,
+            "true_label": 5,
+            "intended_label": 6,
+            "attack_success": 0,
+            "intended_probability": 0.10058655589818954,
+            "intended_loss": 2.296736717224121,
+            "intended_minus_true_logit": -0.011372437700629234
+          },
+          "target_gradient_norm": 1.6427547931671143,
+          "alignment": {
+            "clean": {
+              "norm": 1.3501849174499512,
+              "cosine": 0.8970113396644592,
+              "dot_target": 1.9895915985107422,
+              "squared_distance": 0.5424593687057495
+            },
+            "poisoned": {
+              "norm": 1.4453506469726562,
+              "cosine": 0.900770902633667,
+              "dot_target": 2.138751268386841,
+              "squared_distance": 0.5101789236068726
+            }
+          },
+          "clean_poison_subset_accuracy": 0.0,
+          "perturbed_poison_subset_accuracy": 0.0,
+          "poison_increment_dot_target": 0.14915981888771057,
+          "one_poison_only_step": {
+            "step_size": 0.0001,
+            "target": {
+              "predicted_label": 9,
+              "true_label": 5,
+              "intended_label": 6,
+              "attack_success": 0,
+              "intended_probability": 0.10060754418373108,
+              "intended_loss": 2.2965281009674072,
+              "intended_minus_true_logit": -0.01113947480916977
+            },
+            "intended_loss_change": -0.0002086162567138672
+          }
+        },
+        "victim_clean_trained": {
+          "target": {
+            "predicted_label": 5,
+            "true_label": 5,
+            "intended_label": 6,
+            "attack_success": 0,
+            "intended_probability": 0.00029095693025738,
+            "intended_loss": 8.142334938049316,
+            "intended_minus_true_logit": -8.031661987304688
+          },
+          "target_gradient_norm": 101.8875503540039,
+          "alignment": {
+            "clean": {
+              "norm": 5.891336441040039,
+              "cosine": 0.21094052493572235,
+              "dot_target": 126.61785125732422,
+              "squared_distance": 10162.544921875
+            },
+            "poisoned": {
+              "norm": 2.527456045150757,
+              "cosine": 0.6956194639205933,
+              "dot_target": 179.13333129882812,
+              "squared_distance": 10029.193359375
+            }
+          },
+          "clean_poison_subset_accuracy": 0.92,
+          "perturbed_poison_subset_accuracy": 0.962,
+          "poison_increment_dot_target": 52.5154914855957,
+          "one_poison_only_step": {
+            "step_size": 0.0001,
+            "target": {
+              "predicted_label": 5,
+              "true_label": 5,
+              "intended_label": 6,
+              "attack_success": 0,
+              "intended_probability": 0.00029634428210556507,
+              "intended_loss": 8.12398910522461,
+              "intended_minus_true_logit": -8.012602806091309
+            },
+            "intended_loss_change": -0.01834583282470703
+          }
+        },
+        "victim_poison_trained": {
+          "target": {
+            "predicted_label": 5,
+            "true_label": 5,
+            "intended_label": 6,
+            "attack_success": 0,
+            "intended_probability": 0.23720645904541016,
+            "intended_loss": 1.4388244152069092,
+            "intended_minus_true_logit": -0.9706296920776367
+          },
+          "target_gradient_norm": 73.1424560546875,
+          "alignment": {
+            "clean": {
+              "norm": 6.473033905029297,
+              "cosine": 0.23176072537899017,
+              "dot_target": 109.72795104980469,
+              "squared_distance": 5172.2626953125
+            },
+            "poisoned": {
+              "norm": 1.3968175649642944,
+              "cosine": 0.6013579964637756,
+              "dot_target": 61.438743591308594,
+              "squared_distance": 5228.89208984375
+            }
+          },
+          "clean_poison_subset_accuracy": 0.914,
+          "perturbed_poison_subset_accuracy": 0.978,
+          "poison_increment_dot_target": -48.28921127319336,
+          "one_poison_only_step": {
+            "step_size": 0.0001,
+            "target": {
+              "predicted_label": 5,
+              "true_label": 5,
+              "intended_label": 6,
+              "attack_success": 0,
+              "intended_probability": 0.23875921964645386,
+              "intended_loss": 1.4322996139526367,
+              "intended_minus_true_logit": -0.9615778923034668
+            },
+            "intended_loss_change": -0.006524801254272461
+          }
+        }
+      }
+    },
+    {
+      "case_key": 2100000000,
+      "dataset": "CIFAR10",
+      "model": "ConvNet",
+      "target_id": 1565,
+      "true_label": 6,
+      "intended_label": 9,
+      "count": 500,
+      "fraction": 0.01,
+      "changed_rows": 500,
+      "pixel_linf": 0.125490203499794,
+      "states": {
+        "source_trained": {
+          "target": {
+            "predicted_label": 6,
+            "true_label": 6,
+            "intended_label": 9,
+            "attack_success": 0,
+            "intended_probability": 4.569225893646944e-06,
+            "intended_loss": 12.29616641998291,
+            "intended_minus_true_logit": -12.291854858398438
+          },
+          "target_gradient_norm": 143.19711303710938,
+          "alignment": {
+            "clean": {
+              "norm": 5.961939811706543,
+              "cosine": 0.3479841351509094,
+              "dot_target": 297.08538818359375,
+              "squared_distance": 19946.78515625
+            },
+            "poisoned": {
+              "norm": 19.420555114746094,
+              "cosine": 0.8745570182800293,
+              "dot_target": 2432.114501953125,
+              "squared_distance": 16018.341796875
+            }
+          },
+          "clean_poison_subset_accuracy": 0.928,
+          "perturbed_poison_subset_accuracy": 0.846,
+          "poison_increment_dot_target": 2135.029296875,
+          "one_poison_only_step": {
+            "step_size": 0.0001,
+            "target": {
+              "predicted_label": 6,
+              "true_label": 6,
+              "intended_label": 9,
+              "attack_success": 0,
+              "intended_probability": 5.837258868268691e-06,
+              "intended_loss": 12.051249504089355,
+              "intended_minus_true_logit": -12.04653549194336
+            },
+            "intended_loss_change": -0.2449169158935547
+          }
+        },
+        "victim_initial": {
+          "target": {
+            "predicted_label": 1,
+            "true_label": 6,
+            "intended_label": 9,
+            "attack_success": 0,
+            "intended_probability": 0.10310965031385422,
+            "intended_loss": 2.2719621658325195,
+            "intended_minus_true_logit": 0.04678826406598091
+          },
+          "target_gradient_norm": 1.7117148637771606,
+          "alignment": {
+            "clean": {
+              "norm": 1.7784111499786377,
+              "cosine": 0.9277201294898987,
+              "dot_target": 2.8241028785705566,
+              "squared_distance": 0.444507896900177
+            },
+            "poisoned": {
+              "norm": 1.8316391706466675,
+              "cosine": 0.9271336793899536,
+              "dot_target": 2.9067904949188232,
+              "squared_distance": 0.471288800239563
+            }
+          },
+          "clean_poison_subset_accuracy": 0.0,
+          "perturbed_poison_subset_accuracy": 0.0,
+          "poison_increment_dot_target": 0.08268746733665466,
+          "one_poison_only_step": {
+            "step_size": 0.0001,
+            "target": {
+              "predicted_label": 1,
+              "true_label": 6,
+              "intended_label": 9,
+              "attack_success": 0,
+              "intended_probability": 0.10313976556062698,
+              "intended_loss": 2.271670341491699,
+              "intended_minus_true_logit": 0.04710156470537186
+            },
+            "intended_loss_change": -0.0002918243408203125
+          }
+        },
+        "victim_clean_trained": {
+          "target": {
+            "predicted_label": 6,
+            "true_label": 6,
+            "intended_label": 9,
+            "attack_success": 0,
+            "intended_probability": 0.00030529435025528073,
+            "intended_loss": 8.094234466552734,
+            "intended_minus_true_logit": -8.058244705200195
+          },
+          "target_gradient_norm": 121.22694396972656,
+          "alignment": {
+            "clean": {
+              "norm": 6.026848316192627,
+              "cosine": 0.34812131524086,
+              "dot_target": 254.3431396484375,
+              "squared_distance": 14223.607421875
+            },
+            "poisoned": {
+              "norm": 15.917311668395996,
+              "cosine": 0.8147470951080322,
+              "dot_target": 1572.141845703125,
+              "squared_distance": 11805.048828125
+            }
+          },
+          "clean_poison_subset_accuracy": 0.916,
+          "perturbed_poison_subset_accuracy": 0.854,
+          "poison_increment_dot_target": 1317.798583984375,
+          "one_poison_only_step": {
+            "step_size": 0.0001,
+            "target": {
+              "predicted_label": 6,
+              "true_label": 6,
+              "intended_label": 9,
+              "attack_success": 0,
+              "intended_probability": 0.0003568808315321803,
+              "intended_loss": 7.938108444213867,
+              "intended_minus_true_logit": -7.899300575256348
+            },
+            "intended_loss_change": -0.1561260223388672
+          }
+        },
+        "victim_poison_trained": {
+          "target": {
+            "predicted_label": 9,
+            "true_label": 6,
+            "intended_label": 9,
+            "attack_success": 1,
+            "intended_probability": 0.9289051294326782,
+            "intended_loss": 0.0737486481666565,
+            "intended_minus_true_logit": 3.5449531078338623
+          },
+          "target_gradient_norm": 5.962457180023193,
+          "alignment": {
+            "clean": {
+              "norm": 7.43905782699585,
+              "cosine": 0.4954032003879547,
+              "dot_target": 21.97364044189453,
+              "squared_distance": 46.943199157714844
+            },
+            "poisoned": {
+              "norm": 1.2026430368423462,
+              "cosine": 0.6274182796478271,
+              "dot_target": 4.499032974243164,
+              "squared_distance": 27.999177932739258
+            }
+          },
+          "clean_poison_subset_accuracy": 0.9,
+          "perturbed_poison_subset_accuracy": 0.994,
+          "poison_increment_dot_target": -17.474609375,
+          "one_poison_only_step": {
+            "step_size": 0.0001,
+            "target": {
+              "predicted_label": 9,
+              "true_label": 6,
+              "intended_label": 9,
+              "attack_success": 1,
+              "intended_probability": 0.9292598366737366,
+              "intended_loss": 0.07336687296628952,
+              "intended_minus_true_logit": 3.553194999694824
+            },
+            "intended_loss_change": -0.0003817752003669739
+          }
+        }
+      }
+    },
+    {
+      "case_key": 2110000000,
+      "dataset": "CIFAR10",
+      "model": "ConvNet",
+      "target_id": 2138,
+      "true_label": 6,
+      "intended_label": 2,
+      "count": 500,
+      "fraction": 0.01,
+      "changed_rows": 500,
+      "pixel_linf": 0.125490203499794,
+      "states": {
+        "source_trained": {
+          "target": {
+            "predicted_label": 6,
+            "true_label": 6,
+            "intended_label": 2,
+            "attack_success": 0,
+            "intended_probability": 0.0008574509411118925,
+            "intended_loss": 7.061546802520752,
+            "intended_minus_true_logit": -7.058788299560547
+          },
+          "target_gradient_norm": 110.3621597290039,
+          "alignment": {
+            "clean": {
+              "norm": 12.97175121307373,
+              "cosine": 0.44112417101860046,
+              "dot_target": 631.5091552734375,
+              "squared_distance": 11085.0537109375
+            },
+            "poisoned": {
+              "norm": 5.17332124710083,
+              "cosine": 0.8087142705917358,
+              "dot_target": 461.7264404296875,
+              "squared_distance": 11283.115234375
+            }
+          },
+          "clean_poison_subset_accuracy": 0.78,
+          "perturbed_poison_subset_accuracy": 0.938,
+          "poison_increment_dot_target": -169.78271484375,
+          "one_poison_only_step": {
+            "step_size": 0.0001,
+            "target": {
+              "predicted_label": 6,
+              "true_label": 6,
+              "intended_label": 2,
+              "attack_success": 0,
+              "intended_probability": 0.0008986530592665076,
+              "intended_loss": 7.014613628387451,
+              "intended_minus_true_logit": -7.011752128601074
+            },
+            "intended_loss_change": -0.04693317413330078
+          }
+        },
+        "victim_initial": {
+          "target": {
+            "predicted_label": 5,
+            "true_label": 6,
+            "intended_label": 2,
+            "attack_success": 0,
+            "intended_probability": 0.10011798143386841,
+            "intended_loss": 2.301405906677246,
+            "intended_minus_true_logit": 0.002757747657597065
+          },
+          "target_gradient_norm": 1.466113567352295,
+          "alignment": {
+            "clean": {
+              "norm": 1.26974356174469,
+              "cosine": 0.9234711527824402,
+              "dot_target": 1.719123125076294,
+              "squared_distance": 0.32349199056625366
+            },
+            "poisoned": {
+              "norm": 1.330527663230896,
+              "cosine": 0.9309411644935608,
+              "dot_target": 1.8159914016723633,
+              "squared_distance": 0.287810355424881
+            }
+          },
+          "clean_poison_subset_accuracy": 0.0,
+          "perturbed_poison_subset_accuracy": 0.0,
+          "poison_increment_dot_target": 0.09686841815710068,
+          "one_poison_only_step": {
+            "step_size": 0.0001,
+            "target": {
+              "predicted_label": 5,
+              "true_label": 6,
+              "intended_label": 2,
+              "attack_success": 0,
+              "intended_probability": 0.10013582557439804,
+              "intended_loss": 2.3012278079986572,
+              "intended_minus_true_logit": 0.0029538469389081
+            },
+            "intended_loss_change": -0.0001780986785888672
+          }
+        },
+        "victim_clean_trained": {
+          "target": {
+            "predicted_label": 6,
+            "true_label": 6,
+            "intended_label": 2,
+            "attack_success": 0,
+            "intended_probability": 0.0003962765331380069,
+            "intended_loss": 7.833398342132568,
+            "intended_minus_true_logit": -7.832522869110107
+          },
+          "target_gradient_norm": 101.53028106689453,
+          "alignment": {
+            "clean": {
+              "norm": 12.898578643798828,
+              "cosine": 0.4458238482475281,
+              "dot_target": 583.8492431640625,
+              "squared_distance": 9307.072265625
+            },
+            "poisoned": {
+              "norm": 4.395299434661865,
+              "cosine": 0.7236906886100769,
+              "dot_target": 322.9512939453125,
+              "squared_distance": 9681.814453125
+            }
+          },
+          "clean_poison_subset_accuracy": 0.78,
+          "perturbed_poison_subset_accuracy": 0.942,
+          "poison_increment_dot_target": -260.89794921875,
+          "one_poison_only_step": {
+            "step_size": 0.0001,
+            "target": {
+              "predicted_label": 6,
+              "true_label": 6,
+              "intended_label": 2,
+              "attack_success": 0,
+              "intended_probability": 0.00040910561801865697,
+              "intended_loss": 7.801537036895752,
+              "intended_minus_true_logit": -7.800639629364014
+            },
+            "intended_loss_change": -0.031861305236816406
+          }
+        },
+        "victim_poison_trained": {
+          "target": {
+            "predicted_label": 6,
+            "true_label": 6,
+            "intended_label": 2,
+            "attack_success": 0,
+            "intended_probability": 0.07366804033517838,
+            "intended_loss": 2.6081862449645996,
+            "intended_minus_true_logit": -2.5279951095581055
+          },
+          "target_gradient_norm": 88.583251953125,
+          "alignment": {
+            "clean": {
+              "norm": 14.90845775604248,
+              "cosine": 0.4723983705043793,
+              "dot_target": 623.8680419921875,
+              "squared_distance": 6821.517578125
+            },
+            "poisoned": {
+              "norm": 2.2829947471618652,
+              "cosine": 0.6850665807723999,
+              "dot_target": 138.54449462890625,
+              "squared_distance": 7575.11474609375
+            }
+          },
+          "clean_poison_subset_accuracy": 0.728,
+          "perturbed_poison_subset_accuracy": 0.96,
+          "poison_increment_dot_target": -485.32354736328125,
+          "one_poison_only_step": {
+            "step_size": 0.0001,
+            "target": {
+              "predicted_label": 6,
+              "true_label": 6,
+              "intended_label": 2,
+              "attack_success": 0,
+              "intended_probability": 0.07463972270488739,
+              "intended_loss": 2.5950825214385986,
+              "intended_minus_true_logit": -2.5138139724731445
+            },
+            "intended_loss_change": -0.013103723526000977
+          }
+        }
+      }
+    }
+  ],
+  "controls": [
+    {
+      "name": "fresh-translated-clean",
+      "epochs": 20,
+      "final": {
+        "epoch": 20,
+        "clean_test_accuracy": 0.9931,
+        "predicted_label": 2,
+        "true_label": 2,
+        "intended_label": 7,
+        "attack_success": 0,
+        "intended_probability": 4.757682836498134e-05,
+        "intended_loss": 9.953165054321289,
+        "intended_minus_true_logit": -9.952972412109375
+      },
+      "maximum_intended_probability": 0.002208179794251919,
+      "successful_epochs": 0,
+      "training_seconds": 24.04164480001782,
+      "history": [
+        {
+          "epoch": 1,
+          "clean_test_accuracy": 0.9804,
+          "predicted_label": 2,
+          "true_label": 2,
+          "intended_label": 7,
+          "attack_success": 0,
+          "intended_probability": 1.8639613699633628e-05,
+          "intended_loss": 10.89022159576416,
+          "intended_minus_true_logit": -10.889668464660645
+        },
+        {
+          "epoch": 2,
+          "clean_test_accuracy": 0.9859,
+          "predicted_label": 2,
+          "true_label": 2,
+          "intended_label": 7,
+          "attack_success": 0,
+          "intended_probability": 4.611144322552718e-05,
+          "intended_loss": 9.98444938659668,
+          "intended_minus_true_logit": -9.984111785888672
+        },
+        {
+          "epoch": 3,
+          "clean_test_accuracy": 0.9867,
+          "predicted_label": 2,
+          "true_label": 2,
+          "intended_label": 7,
+          "attack_success": 0,
+          "intended_probability": 1.1313918548694346e-05,
+          "intended_loss": 11.389476776123047,
+          "intended_minus_true_logit": -11.389177322387695
+        },
+        {
+          "epoch": 4,
+          "clean_test_accuracy": 0.9881,
+          "predicted_label": 2,
+          "true_label": 2,
+          "intended_label": 7,
+          "attack_success": 0,
+          "intended_probability": 7.083272521413164e-06,
+          "intended_loss": 11.85777473449707,
+          "intended_minus_true_logit": -11.857218742370605
+        },
+        {
+          "epoch": 5,
+          "clean_test_accuracy": 0.9884,
+          "predicted_label": 2,
+          "true_label": 2,
+          "intended_label": 7,
+          "attack_success": 0,
+          "intended_probability": 7.566269687231397e-06,
+          "intended_loss": 11.791810035705566,
+          "intended_minus_true_logit": -11.791727066040039
+        },
+        {
+          "epoch": 6,
+          "clean_test_accuracy": 0.9883,
+          "predicted_label": 2,
+          "true_label": 2,
+          "intended_label": 7,
+          "attack_success": 0,
+          "intended_probability": 5.276773208606755e-06,
+          "intended_loss": 12.152195930480957,
+          "intended_minus_true_logit": -12.152154922485352
+        },
+        {
+          "epoch": 7,
+          "clean_test_accuracy": 0.9882,
+          "predicted_label": 2,
+          "true_label": 2,
+          "intended_label": 7,
+          "attack_success": 0,
+          "intended_probability": 0.002208179794251919,
+          "intended_loss": 6.115586757659912,
+          "intended_minus_true_logit": -6.11314582824707
+        },
+        {
+          "epoch": 8,
+          "clean_test_accuracy": 0.992,
+          "predicted_label": 2,
+          "true_label": 2,
+          "intended_label": 7,
+          "attack_success": 0,
+          "intended_probability": 0.00012567293015308678,
+          "intended_loss": 8.981827735900879,
+          "intended_minus_true_logit": -8.981579780578613
+        },
+        {
+          "epoch": 9,
+          "clean_test_accuracy": 0.9912,
+          "predicted_label": 2,
+          "true_label": 2,
+          "intended_label": 7,
+          "attack_success": 0,
+          "intended_probability": 3.6947116313967854e-05,
+          "intended_loss": 10.206023216247559,
+          "intended_minus_true_logit": -10.205872535705566
+        },
+        {
+          "epoch": 10,
+          "clean_test_accuracy": 0.9922,
+          "predicted_label": 2,
+          "true_label": 2,
+          "intended_label": 7,
+          "attack_success": 0,
+          "intended_probability": 3.0645413062302396e-05,
+          "intended_loss": 10.393027305603027,
+          "intended_minus_true_logit": -10.392900466918945
+        },
+        {
+          "epoch": 11,
+          "clean_test_accuracy": 0.9932,
+          "predicted_label": 2,
+          "true_label": 2,
+          "intended_label": 7,
+          "attack_success": 0,
+          "intended_probability": 5.764061279478483e-05,
+          "intended_loss": 9.761282920837402,
+          "intended_minus_true_logit": -9.761059761047363
+        },
+        {
+          "epoch": 12,
+          "clean_test_accuracy": 0.9928,
+          "predicted_label": 2,
+          "true_label": 2,
+          "intended_label": 7,
+          "attack_success": 0,
+          "intended_probability": 6.732717884005979e-05,
+          "intended_loss": 9.60594654083252,
+          "intended_minus_true_logit": -9.605680465698242
+        },
+        {
+          "epoch": 13,
+          "clean_test_accuracy": 0.9935,
+          "predicted_label": 2,
+          "true_label": 2,
+          "intended_label": 7,
+          "attack_success": 0,
+          "intended_probability": 4.963454193784855e-05,
+          "intended_loss": 9.910823822021484,
+          "intended_minus_true_logit": -9.910629272460938
+        },
+        {
+          "epoch": 14,
+          "clean_test_accuracy": 0.993,
+          "predicted_label": 2,
+          "true_label": 2,
+          "intended_label": 7,
+          "attack_success": 0,
+          "intended_probability": 5.576129478868097e-05,
+          "intended_loss": 9.79443073272705,
+          "intended_minus_true_logit": -9.794218063354492
+        },
+        {
+          "epoch": 15,
+          "clean_test_accuracy": 0.9928,
+          "predicted_label": 2,
+          "true_label": 2,
+          "intended_label": 7,
+          "attack_success": 0,
+          "intended_probability": 5.688170131179504e-05,
+          "intended_loss": 9.774537086486816,
+          "intended_minus_true_logit": -9.77432632446289
+        },
+        {
+          "epoch": 16,
+          "clean_test_accuracy": 0.9931,
+          "predicted_label": 2,
+          "true_label": 2,
+          "intended_label": 7,
+          "attack_success": 0,
+          "intended_probability": 4.8777470510685816e-05,
+          "intended_loss": 9.928241729736328,
+          "intended_minus_true_logit": -9.928047180175781
+        },
+        {
+          "epoch": 17,
+          "clean_test_accuracy": 0.9933,
+          "predicted_label": 2,
+          "true_label": 2,
+          "intended_label": 7,
+          "attack_success": 0,
+          "intended_probability": 4.423577047418803e-05,
+          "intended_loss": 10.02597713470459,
+          "intended_minus_true_logit": -10.02579116821289
+        },
+        {
+          "epoch": 18,
+          "clean_test_accuracy": 0.9932,
+          "predicted_label": 2,
+          "true_label": 2,
+          "intended_label": 7,
+          "attack_success": 0,
+          "intended_probability": 4.607500522979535e-05,
+          "intended_loss": 9.98523998260498,
+          "intended_minus_true_logit": -9.985050201416016
+        },
+        {
+          "epoch": 19,
+          "clean_test_accuracy": 0.9932,
+          "predicted_label": 2,
+          "true_label": 2,
+          "intended_label": 7,
+          "attack_success": 0,
+          "intended_probability": 4.684268787968904e-05,
+          "intended_loss": 9.96871566772461,
+          "intended_minus_true_logit": -9.968523979187012
+        },
+        {
+          "epoch": 20,
+          "clean_test_accuracy": 0.9931,
+          "predicted_label": 2,
+          "true_label": 2,
+          "intended_label": 7,
+          "attack_success": 0,
+          "intended_probability": 4.757682836498134e-05,
+          "intended_loss": 9.953165054321289,
+          "intended_minus_true_logit": -9.952972412109375
+        }
+      ]
+    },
+    {
+      "name": "fresh-translated-poison",
+      "epochs": 20,
+      "final": {
+        "epoch": 20,
+        "clean_test_accuracy": 0.9928,
+        "predicted_label": 2,
+        "true_label": 2,
+        "intended_label": 7,
+        "attack_success": 0,
+        "intended_probability": 0.0005815421463921666,
+        "intended_loss": 7.449827194213867,
+        "intended_minus_true_logit": -7.448854446411133
+      },
+      "maximum_intended_probability": 0.0037039972376078367,
+      "successful_epochs": 0,
+      "training_seconds": 20.786282900022343,
+      "history": [
+        {
+          "epoch": 1,
+          "clean_test_accuracy": 0.9793,
+          "predicted_label": 2,
+          "true_label": 2,
+          "intended_label": 7,
+          "attack_success": 0,
+          "intended_probability": 5.572066220338456e-05,
+          "intended_loss": 9.795159339904785,
+          "intended_minus_true_logit": -9.794811248779297
+        },
+        {
+          "epoch": 2,
+          "clean_test_accuracy": 0.9826,
+          "predicted_label": 2,
+          "true_label": 2,
+          "intended_label": 7,
+          "attack_success": 0,
+          "intended_probability": 0.0003332050982862711,
+          "intended_loss": 8.006752014160156,
+          "intended_minus_true_logit": -8.00602912902832
+        },
+        {
+          "epoch": 3,
+          "clean_test_accuracy": 0.9868,
+          "predicted_label": 2,
+          "true_label": 2,
+          "intended_label": 7,
+          "attack_success": 0,
+          "intended_probability": 0.0008319223416037858,
+          "intended_loss": 7.091771602630615,
+          "intended_minus_true_logit": -7.090750217437744
+        },
+        {
+          "epoch": 4,
+          "clean_test_accuracy": 0.9864,
+          "predicted_label": 2,
+          "true_label": 2,
+          "intended_label": 7,
+          "attack_success": 0,
+          "intended_probability": 5.411429447121918e-05,
+          "intended_loss": 9.82441234588623,
+          "intended_minus_true_logit": -9.824071884155273
+        },
+        {
+          "epoch": 5,
+          "clean_test_accuracy": 0.9835,
+          "predicted_label": 2,
+          "true_label": 2,
+          "intended_label": 7,
+          "attack_success": 0,
+          "intended_probability": 2.527867582102772e-05,
+          "intended_loss": 10.585549354553223,
+          "intended_minus_true_logit": -10.585309028625488
+        },
+        {
+          "epoch": 6,
+          "clean_test_accuracy": 0.9854,
+          "predicted_label": 2,
+          "true_label": 2,
+          "intended_label": 7,
+          "attack_success": 0,
+          "intended_probability": 2.0373412553453818e-05,
+          "intended_loss": 10.80128002166748,
+          "intended_minus_true_logit": -10.801213264465332
+        },
+        {
+          "epoch": 7,
+          "clean_test_accuracy": 0.9895,
+          "predicted_label": 2,
+          "true_label": 2,
+          "intended_label": 7,
+          "attack_success": 0,
+          "intended_probability": 0.0037039972376078367,
+          "intended_loss": 5.598342418670654,
+          "intended_minus_true_logit": -5.594310760498047
+        },
+        {
+          "epoch": 8,
+          "clean_test_accuracy": 0.9922,
+          "predicted_label": 2,
+          "true_label": 2,
+          "intended_label": 7,
+          "attack_success": 0,
+          "intended_probability": 0.002746995771303773,
+          "intended_loss": 5.897247314453125,
+          "intended_minus_true_logit": -5.893997669219971
+        },
+        {
+          "epoch": 9,
+          "clean_test_accuracy": 0.9919,
+          "predicted_label": 2,
+          "true_label": 2,
+          "intended_label": 7,
+          "attack_success": 0,
+          "intended_probability": 0.000755452027078718,
+          "intended_loss": 7.188194274902344,
+          "intended_minus_true_logit": -7.187079429626465
+        },
+        {
+          "epoch": 10,
+          "clean_test_accuracy": 0.9927,
+          "predicted_label": 2,
+          "true_label": 2,
+          "intended_label": 7,
+          "attack_success": 0,
+          "intended_probability": 0.0008047011215239763,
+          "intended_loss": 7.125039577484131,
+          "intended_minus_true_logit": -7.1239013671875
+        },
+        {
+          "epoch": 11,
+          "clean_test_accuracy": 0.9923,
+          "predicted_label": 2,
+          "true_label": 2,
+          "intended_label": 7,
+          "attack_success": 0,
+          "intended_probability": 0.0012019691057503223,
+          "intended_loss": 6.723793983459473,
+          "intended_minus_true_logit": -6.722051620483398
+        },
+        {
+          "epoch": 12,
+          "clean_test_accuracy": 0.9922,
+          "predicted_label": 2,
+          "true_label": 2,
+          "intended_label": 7,
+          "attack_success": 0,
+          "intended_probability": 0.001260618562810123,
+          "intended_loss": 6.67615270614624,
+          "intended_minus_true_logit": -6.674051284790039
+        },
+        {
+          "epoch": 13,
+          "clean_test_accuracy": 0.993,
+          "predicted_label": 2,
+          "true_label": 2,
+          "intended_label": 7,
+          "attack_success": 0,
+          "intended_probability": 0.0006167516112327576,
+          "intended_loss": 7.3910441398620605,
+          "intended_minus_true_logit": -7.390000343322754
+        },
+        {
+          "epoch": 14,
+          "clean_test_accuracy": 0.9926,
+          "predicted_label": 2,
+          "true_label": 2,
+          "intended_label": 7,
+          "attack_success": 0,
+          "intended_probability": 0.0007478679763153195,
+          "intended_loss": 7.198284149169922,
+          "intended_minus_true_logit": -7.1970601081848145
+        },
+        {
+          "epoch": 15,
+          "clean_test_accuracy": 0.9928,
+          "predicted_label": 2,
+          "true_label": 2,
+          "intended_label": 7,
+          "attack_success": 0,
+          "intended_probability": 0.0007361445459537208,
+          "intended_loss": 7.214084148406982,
+          "intended_minus_true_logit": -7.212879180908203
+        },
+        {
+          "epoch": 16,
+          "clean_test_accuracy": 0.9926,
+          "predicted_label": 2,
+          "true_label": 2,
+          "intended_label": 7,
+          "attack_success": 0,
+          "intended_probability": 0.0006071841344237328,
+          "intended_loss": 7.406678199768066,
+          "intended_minus_true_logit": -7.405669689178467
+        },
+        {
+          "epoch": 17,
+          "clean_test_accuracy": 0.9929,
+          "predicted_label": 2,
+          "true_label": 2,
+          "intended_label": 7,
+          "attack_success": 0,
+          "intended_probability": 0.0005360986688174307,
+          "intended_loss": 7.531192302703857,
+          "intended_minus_true_logit": -7.530282974243164
+        },
+        {
+          "epoch": 18,
+          "clean_test_accuracy": 0.9928,
+          "predicted_label": 2,
+          "true_label": 2,
+          "intended_label": 7,
+          "attack_success": 0,
+          "intended_probability": 0.0005669686361216009,
+          "intended_loss": 7.47520637512207,
+          "intended_minus_true_logit": -7.474255084991455
+        },
+        {
+          "epoch": 19,
+          "clean_test_accuracy": 0.9928,
+          "predicted_label": 2,
+          "true_label": 2,
+          "intended_label": 7,
+          "attack_success": 0,
+          "intended_probability": 0.0005768521223217249,
+          "intended_loss": 7.457924842834473,
+          "intended_minus_true_logit": -7.45695686340332
+        },
+        {
+          "epoch": 20,
+          "clean_test_accuracy": 0.9928,
+          "predicted_label": 2,
+          "true_label": 2,
+          "intended_label": 7,
+          "attack_success": 0,
+          "intended_probability": 0.0005815421463921666,
+          "intended_loss": 7.449827194213867,
+          "intended_minus_true_logit": -7.448854446411133
+        }
+      ]
+    },
+    {
+      "name": "warm-source-translated-clean",
+      "epochs": 20,
+      "final": {
+        "epoch": 20,
+        "clean_test_accuracy": 0.9946,
+        "predicted_label": 2,
+        "true_label": 2,
+        "intended_label": 7,
+        "attack_success": 0,
+        "intended_probability": 0.00011589317728066817,
+        "intended_loss": 9.062841415405273,
+        "intended_minus_true_logit": -9.062555313110352
+      },
+      "maximum_intended_probability": 0.0005079851252958179,
+      "successful_epochs": 0,
+      "training_seconds": 23.50726929999655,
+      "history": [
+        {
+          "epoch": 1,
+          "clean_test_accuracy": 0.9907,
+          "predicted_label": 2,
+          "true_label": 2,
+          "intended_label": 7,
+          "attack_success": 0,
+          "intended_probability": 1.827177948143799e-05,
+          "intended_loss": 10.910152435302734,
+          "intended_minus_true_logit": -10.910083770751953
+        },
+        {
+          "epoch": 2,
+          "clean_test_accuracy": 0.9876,
+          "predicted_label": 2,
+          "true_label": 2,
+          "intended_label": 7,
+          "attack_success": 0,
+          "intended_probability": 0.00012082338071195409,
+          "intended_loss": 9.021181106567383,
+          "intended_minus_true_logit": -9.02090072631836
+        },
+        {
+          "epoch": 3,
+          "clean_test_accuracy": 0.9867,
+          "predicted_label": 2,
+          "true_label": 2,
+          "intended_label": 7,
+          "attack_success": 0,
+          "intended_probability": 8.686114597367123e-05,
+          "intended_loss": 9.351200103759766,
+          "intended_minus_true_logit": -9.350937843322754
+        },
+        {
+          "epoch": 4,
+          "clean_test_accuracy": 0.9912,
+          "predicted_label": 2,
+          "true_label": 2,
+          "intended_label": 7,
+          "attack_success": 0,
+          "intended_probability": 8.99970382306492e-06,
+          "intended_loss": 11.618318557739258,
+          "intended_minus_true_logit": -11.618056297302246
+        },
+        {
+          "epoch": 5,
+          "clean_test_accuracy": 0.9903,
+          "predicted_label": 2,
+          "true_label": 2,
+          "intended_label": 7,
+          "attack_success": 0,
+          "intended_probability": 1.1033102964574937e-05,
+          "intended_loss": 11.414610862731934,
+          "intended_minus_true_logit": -11.414517402648926
+        },
+        {
+          "epoch": 6,
+          "clean_test_accuracy": 0.9873,
+          "predicted_label": 2,
+          "true_label": 2,
+          "intended_label": 7,
+          "attack_success": 0,
+          "intended_probability": 6.350031526380917e-06,
+          "intended_loss": 11.967050552368164,
+          "intended_minus_true_logit": -11.966940879821777
+        },
+        {
+          "epoch": 7,
+          "clean_test_accuracy": 0.9906,
+          "predicted_label": 2,
+          "true_label": 2,
+          "intended_label": 7,
+          "attack_success": 0,
+          "intended_probability": 0.0005079851252958179,
+          "intended_loss": 7.585058212280273,
+          "intended_minus_true_logit": -7.584195137023926
+        },
+        {
+          "epoch": 8,
+          "clean_test_accuracy": 0.9938,
+          "predicted_label": 2,
+          "true_label": 2,
+          "intended_label": 7,
+          "attack_success": 0,
+          "intended_probability": 0.00013488843978848308,
+          "intended_loss": 8.911062240600586,
+          "intended_minus_true_logit": -8.910794258117676
+        },
+        {
+          "epoch": 9,
+          "clean_test_accuracy": 0.9935,
+          "predicted_label": 2,
+          "true_label": 2,
+          "intended_label": 7,
+          "attack_success": 0,
+          "intended_probability": 0.0001439059997210279,
+          "intended_loss": 8.84635066986084,
+          "intended_minus_true_logit": -8.84600830078125
+        },
+        {
+          "epoch": 10,
+          "clean_test_accuracy": 0.9939,
+          "predicted_label": 2,
+          "true_label": 2,
+          "intended_label": 7,
+          "attack_success": 0,
+          "intended_probability": 7.26564830983989e-05,
+          "intended_loss": 9.529767990112305,
+          "intended_minus_true_logit": -9.52957534790039
+        },
+        {
+          "epoch": 11,
+          "clean_test_accuracy": 0.9941,
+          "predicted_label": 2,
+          "true_label": 2,
+          "intended_label": 7,
+          "attack_success": 0,
+          "intended_probability": 0.00013668207975570112,
+          "intended_loss": 8.897852897644043,
+          "intended_minus_true_logit": -8.897517204284668
+        },
+        {
+          "epoch": 12,
+          "clean_test_accuracy": 0.9942,
+          "predicted_label": 2,
+          "true_label": 2,
+          "intended_label": 7,
+          "attack_success": 0,
+          "intended_probability": 0.00024143689370248467,
+          "intended_loss": 8.328902244567871,
+          "intended_minus_true_logit": -8.328307151794434
+        },
+        {
+          "epoch": 13,
+          "clean_test_accuracy": 0.9948,
+          "predicted_label": 2,
+          "true_label": 2,
+          "intended_label": 7,
+          "attack_success": 0,
+          "intended_probability": 0.00012977713777218014,
+          "intended_loss": 8.949691772460938,
+          "intended_minus_true_logit": -8.94937515258789
+        },
+        {
+          "epoch": 14,
+          "clean_test_accuracy": 0.9948,
+          "predicted_label": 2,
+          "true_label": 2,
+          "intended_label": 7,
+          "attack_success": 0,
+          "intended_probability": 0.00014240415475796908,
+          "intended_loss": 8.856841087341309,
+          "intended_minus_true_logit": -8.856496810913086
+        },
+        {
+          "epoch": 15,
+          "clean_test_accuracy": 0.9943,
+          "predicted_label": 2,
+          "true_label": 2,
+          "intended_label": 7,
+          "attack_success": 0,
+          "intended_probability": 0.00013649674656335264,
+          "intended_loss": 8.899209976196289,
+          "intended_minus_true_logit": -8.898887634277344
+        },
+        {
+          "epoch": 16,
+          "clean_test_accuracy": 0.9945,
+          "predicted_label": 2,
+          "true_label": 2,
+          "intended_label": 7,
+          "attack_success": 0,
+          "intended_probability": 0.00011156409891555086,
+          "intended_loss": 9.100911140441895,
+          "intended_minus_true_logit": -9.100637435913086
+        },
+        {
+          "epoch": 17,
+          "clean_test_accuracy": 0.9948,
+          "predicted_label": 2,
+          "true_label": 2,
+          "intended_label": 7,
+          "attack_success": 0,
+          "intended_probability": 0.0001038609043462202,
+          "intended_loss": 9.172457695007324,
+          "intended_minus_true_logit": -9.172194480895996
+        },
+        {
+          "epoch": 18,
+          "clean_test_accuracy": 0.9945,
+          "predicted_label": 2,
+          "true_label": 2,
+          "intended_label": 7,
+          "attack_success": 0,
+          "intended_probability": 0.0001134378180722706,
+          "intended_loss": 9.084256172180176,
+          "intended_minus_true_logit": -9.083972930908203
+        },
+        {
+          "epoch": 19,
+          "clean_test_accuracy": 0.9946,
+          "predicted_label": 2,
+          "true_label": 2,
+          "intended_label": 7,
+          "attack_success": 0,
+          "intended_probability": 0.00011629427899606526,
+          "intended_loss": 9.059386253356934,
+          "intended_minus_true_logit": -9.059099197387695
+        },
+        {
+          "epoch": 20,
+          "clean_test_accuracy": 0.9946,
+          "predicted_label": 2,
+          "true_label": 2,
+          "intended_label": 7,
+          "attack_success": 0,
+          "intended_probability": 0.00011589317728066817,
+          "intended_loss": 9.062841415405273,
+          "intended_minus_true_logit": -9.062555313110352
+        }
+      ]
+    },
+    {
+      "name": "warm-source-translated-poison",
+      "epochs": 20,
+      "final": {
+        "epoch": 20,
+        "clean_test_accuracy": 0.9949,
+        "predicted_label": 2,
+        "true_label": 2,
+        "intended_label": 7,
+        "attack_success": 0,
+        "intended_probability": 0.00031377223785966635,
+        "intended_loss": 8.066843032836914,
+        "intended_minus_true_logit": -8.066357612609863
+      },
+      "maximum_intended_probability": 0.0010235983645543456,
+      "successful_epochs": 0,
+      "training_seconds": 23.98922180000227,
+      "history": [
+        {
+          "epoch": 1,
+          "clean_test_accuracy": 0.9882,
+          "predicted_label": 2,
+          "true_label": 2,
+          "intended_label": 7,
+          "attack_success": 0,
+          "intended_probability": 0.00023295442224480212,
+          "intended_loss": 8.364667892456055,
+          "intended_minus_true_logit": -8.364338874816895
+        },
+        {
+          "epoch": 2,
+          "clean_test_accuracy": 0.9862,
+          "predicted_label": 2,
+          "true_label": 2,
+          "intended_label": 7,
+          "attack_success": 0,
+          "intended_probability": 0.0010235983645543456,
+          "intended_loss": 6.884430885314941,
+          "intended_minus_true_logit": -6.882965087890625
+        },
+        {
+          "epoch": 3,
+          "clean_test_accuracy": 0.9886,
+          "predicted_label": 2,
+          "true_label": 2,
+          "intended_label": 7,
+          "attack_success": 0,
+          "intended_probability": 0.00021366523287724704,
+          "intended_loss": 8.45110034942627,
+          "intended_minus_true_logit": -8.45075511932373
+        },
+        {
+          "epoch": 4,
+          "clean_test_accuracy": 0.9901,
+          "predicted_label": 2,
+          "true_label": 2,
+          "intended_label": 7,
+          "attack_success": 0,
+          "intended_probability": 0.0005592864472419024,
+          "intended_loss": 7.488848686218262,
+          "intended_minus_true_logit": -7.487378120422363
+        },
+        {
+          "epoch": 5,
+          "clean_test_accuracy": 0.9904,
+          "predicted_label": 2,
+          "true_label": 2,
+          "intended_label": 7,
+          "attack_success": 0,
+          "intended_probability": 0.0002963389561045915,
+          "intended_loss": 8.124006271362305,
+          "intended_minus_true_logit": -8.123518943786621
+        },
+        {
+          "epoch": 6,
+          "clean_test_accuracy": 0.9889,
+          "predicted_label": 2,
+          "true_label": 2,
+          "intended_label": 7,
+          "attack_success": 0,
+          "intended_probability": 7.698273111600429e-05,
+          "intended_loss": 9.471929550170898,
+          "intended_minus_true_logit": -9.471793174743652
+        },
+        {
+          "epoch": 7,
+          "clean_test_accuracy": 0.9895,
+          "predicted_label": 2,
+          "true_label": 2,
+          "intended_label": 7,
+          "attack_success": 0,
+          "intended_probability": 0.00010009729157900438,
+          "intended_loss": 9.209367752075195,
+          "intended_minus_true_logit": -9.209196090698242
+        },
+        {
+          "epoch": 8,
+          "clean_test_accuracy": 0.9939,
+          "predicted_label": 2,
+          "true_label": 2,
+          "intended_label": 7,
+          "attack_success": 0,
+          "intended_probability": 0.00040561225614510477,
+          "intended_loss": 7.810112953186035,
+          "intended_minus_true_logit": -7.8095502853393555
+        },
+        {
+          "epoch": 9,
+          "clean_test_accuracy": 0.9929,
+          "predicted_label": 2,
+          "true_label": 2,
+          "intended_label": 7,
+          "attack_success": 0,
+          "intended_probability": 0.00024342800315935165,
+          "intended_loss": 8.32068920135498,
+          "intended_minus_true_logit": -8.320301055908203
+        },
+        {
+          "epoch": 10,
+          "clean_test_accuracy": 0.994,
+          "predicted_label": 2,
+          "true_label": 2,
+          "intended_label": 7,
+          "attack_success": 0,
+          "intended_probability": 0.0003513920237310231,
+          "intended_loss": 7.95360803604126,
+          "intended_minus_true_logit": -7.953117847442627
+        },
+        {
+          "epoch": 11,
+          "clean_test_accuracy": 0.9942,
+          "predicted_label": 2,
+          "true_label": 2,
+          "intended_label": 7,
+          "attack_success": 0,
+          "intended_probability": 0.00041969254380092025,
+          "intended_loss": 7.7759881019592285,
+          "intended_minus_true_logit": -7.775362968444824
+        },
+        {
+          "epoch": 12,
+          "clean_test_accuracy": 0.9941,
+          "predicted_label": 2,
+          "true_label": 2,
+          "intended_label": 7,
+          "attack_success": 0,
+          "intended_probability": 0.000692620116751641,
+          "intended_loss": 7.275028705596924,
+          "intended_minus_true_logit": -7.274004936218262
+        },
+        {
+          "epoch": 13,
+          "clean_test_accuracy": 0.9943,
+          "predicted_label": 2,
+          "true_label": 2,
+          "intended_label": 7,
+          "attack_success": 0,
+          "intended_probability": 0.0003661933296825737,
+          "intended_loss": 7.912349224090576,
+          "intended_minus_true_logit": -7.911797046661377
+        },
+        {
+          "epoch": 14,
+          "clean_test_accuracy": 0.9945,
+          "predicted_label": 2,
+          "true_label": 2,
+          "intended_label": 7,
+          "attack_success": 0,
+          "intended_probability": 0.0003422218142077327,
+          "intended_loss": 7.980051517486572,
+          "intended_minus_true_logit": -7.979528427124023
+        },
+        {
+          "epoch": 15,
+          "clean_test_accuracy": 0.9947,
+          "predicted_label": 2,
+          "true_label": 2,
+          "intended_label": 7,
+          "attack_success": 0,
+          "intended_probability": 0.00034597874036990106,
+          "intended_loss": 7.969133377075195,
+          "intended_minus_true_logit": -7.968605995178223
+        },
+        {
+          "epoch": 16,
+          "clean_test_accuracy": 0.9948,
+          "predicted_label": 2,
+          "true_label": 2,
+          "intended_label": 7,
+          "attack_success": 0,
+          "intended_probability": 0.0002891140466090292,
+          "intended_loss": 8.148689270019531,
+          "intended_minus_true_logit": -8.148244857788086
+        },
+        {
+          "epoch": 17,
+          "clean_test_accuracy": 0.995,
+          "predicted_label": 2,
+          "true_label": 2,
+          "intended_label": 7,
+          "attack_success": 0,
+          "intended_probability": 0.0002850437304005027,
+          "intended_loss": 8.162867546081543,
+          "intended_minus_true_logit": -8.162421226501465
+        },
+        {
+          "epoch": 18,
+          "clean_test_accuracy": 0.9949,
+          "predicted_label": 2,
+          "true_label": 2,
+          "intended_label": 7,
+          "attack_success": 0,
+          "intended_probability": 0.0003062574251089245,
+          "intended_loss": 8.091084480285645,
+          "intended_minus_true_logit": -8.090608596801758
+        },
+        {
+          "epoch": 19,
+          "clean_test_accuracy": 0.9949,
+          "predicted_label": 2,
+          "true_label": 2,
+          "intended_label": 7,
+          "attack_success": 0,
+          "intended_probability": 0.00031348480843007565,
+          "intended_loss": 8.06775951385498,
+          "intended_minus_true_logit": -8.06727409362793
+        },
+        {
+          "epoch": 20,
+          "clean_test_accuracy": 0.9949,
+          "predicted_label": 2,
+          "true_label": 2,
+          "intended_label": 7,
+          "attack_success": 0,
+          "intended_probability": 0.00031377223785966635,
+          "intended_loss": 8.066843032836914,
+          "intended_minus_true_logit": -8.066357612609863
+        }
+      ]
+    },
+    {
+      "name": "fresh-no-translation-clean",
+      "epochs": 20,
+      "final": {
+        "epoch": 20,
+        "clean_test_accuracy": 0.992,
+        "predicted_label": 2,
+        "true_label": 2,
+        "intended_label": 7,
+        "attack_success": 0,
+        "intended_probability": 7.87639419286279e-06,
+        "intended_loss": 11.751640319824219,
+        "intended_minus_true_logit": -11.751492500305176
+      },
+      "maximum_intended_probability": 5.485615838551894e-05,
+      "successful_epochs": 0,
+      "training_seconds": 16.91729340000893,
+      "history": [
+        {
+          "epoch": 1,
+          "clean_test_accuracy": 0.9753,
+          "predicted_label": 2,
+          "true_label": 2,
+          "intended_label": 7,
+          "attack_success": 0,
+          "intended_probability": 7.397329227387672e-06,
+          "intended_loss": 11.814391136169434,
+          "intended_minus_true_logit": -11.811091423034668
+        },
+        {
+          "epoch": 2,
+          "clean_test_accuracy": 0.9815,
+          "predicted_label": 2,
+          "true_label": 2,
+          "intended_label": 7,
+          "attack_success": 0,
+          "intended_probability": 5.485615838551894e-05,
+          "intended_loss": 9.810795783996582,
+          "intended_minus_true_logit": -9.803504943847656
+        },
+        {
+          "epoch": 3,
+          "clean_test_accuracy": 0.9813,
+          "predicted_label": 2,
+          "true_label": 2,
+          "intended_label": 7,
+          "attack_success": 0,
+          "intended_probability": 9.429131750948727e-06,
+          "intended_loss": 11.571706771850586,
+          "intended_minus_true_logit": -11.571398735046387
+        },
+        {
+          "epoch": 4,
+          "clean_test_accuracy": 0.9868,
+          "predicted_label": 2,
+          "true_label": 2,
+          "intended_label": 7,
+          "attack_success": 0,
+          "intended_probability": 9.689250873634592e-06,
+          "intended_loss": 11.544493675231934,
+          "intended_minus_true_logit": -11.544248580932617
+        },
+        {
+          "epoch": 5,
+          "clean_test_accuracy": 0.987,
+          "predicted_label": 2,
+          "true_label": 2,
+          "intended_label": 7,
+          "attack_success": 0,
+          "intended_probability": 4.898216957371915e-06,
+          "intended_loss": 12.226639747619629,
+          "intended_minus_true_logit": -12.226486206054688
+        },
+        {
+          "epoch": 6,
+          "clean_test_accuracy": 0.983,
+          "predicted_label": 2,
+          "true_label": 2,
+          "intended_label": 7,
+          "attack_success": 0,
+          "intended_probability": 3.436554379732115e-06,
+          "intended_loss": 12.58104133605957,
+          "intended_minus_true_logit": -12.580977439880371
+        },
+        {
+          "epoch": 7,
+          "clean_test_accuracy": 0.9881,
+          "predicted_label": 2,
+          "true_label": 2,
+          "intended_label": 7,
+          "attack_success": 0,
+          "intended_probability": 2.4570941604906693e-05,
+          "intended_loss": 10.613945960998535,
+          "intended_minus_true_logit": -10.613702774047852
+        },
+        {
+          "epoch": 8,
+          "clean_test_accuracy": 0.9906,
+          "predicted_label": 2,
+          "true_label": 2,
+          "intended_label": 7,
+          "attack_success": 0,
+          "intended_probability": 8.212821740016807e-06,
+          "intended_loss": 11.709814071655273,
+          "intended_minus_true_logit": -11.70969295501709
+        },
+        {
+          "epoch": 9,
+          "clean_test_accuracy": 0.9912,
+          "predicted_label": 2,
+          "true_label": 2,
+          "intended_label": 7,
+          "attack_success": 0,
+          "intended_probability": 6.787536221963819e-06,
+          "intended_loss": 11.900422096252441,
+          "intended_minus_true_logit": -11.900278091430664
+        },
+        {
+          "epoch": 10,
+          "clean_test_accuracy": 0.9919,
+          "predicted_label": 2,
+          "true_label": 2,
+          "intended_label": 7,
+          "attack_success": 0,
+          "intended_probability": 7.416454536723904e-06,
+          "intended_loss": 11.811809539794922,
+          "intended_minus_true_logit": -11.811660766601562
+        },
+        {
+          "epoch": 11,
+          "clean_test_accuracy": 0.9915,
+          "predicted_label": 2,
+          "true_label": 2,
+          "intended_label": 7,
+          "attack_success": 0,
+          "intended_probability": 7.938888302305713e-06,
+          "intended_loss": 11.74373722076416,
+          "intended_minus_true_logit": -11.743541717529297
+        },
+        {
+          "epoch": 12,
+          "clean_test_accuracy": 0.9919,
+          "predicted_label": 2,
+          "true_label": 2,
+          "intended_label": 7,
+          "attack_success": 0,
+          "intended_probability": 1.0198361451330129e-05,
+          "intended_loss": 11.49328327178955,
+          "intended_minus_true_logit": -11.493099212646484
+        },
+        {
+          "epoch": 13,
+          "clean_test_accuracy": 0.9924,
+          "predicted_label": 2,
+          "true_label": 2,
+          "intended_label": 7,
+          "attack_success": 0,
+          "intended_probability": 8.319808330270462e-06,
+          "intended_loss": 11.696871757507324,
+          "intended_minus_true_logit": -11.696714401245117
+        },
+        {
+          "epoch": 14,
+          "clean_test_accuracy": 0.9923,
+          "predicted_label": 2,
+          "true_label": 2,
+          "intended_label": 7,
+          "attack_success": 0,
+          "intended_probability": 8.306697054649703e-06,
+          "intended_loss": 11.698448181152344,
+          "intended_minus_true_logit": -11.698295593261719
+        },
+        {
+          "epoch": 15,
+          "clean_test_accuracy": 0.9922,
+          "predicted_label": 2,
+          "true_label": 2,
+          "intended_label": 7,
+          "attack_success": 0,
+          "intended_probability": 8.437484211754054e-06,
+          "intended_loss": 11.682826042175293,
+          "intended_minus_true_logit": -11.6826753616333
+        },
+        {
+          "epoch": 16,
+          "clean_test_accuracy": 0.992,
+          "predicted_label": 2,
+          "true_label": 2,
+          "intended_label": 7,
+          "attack_success": 0,
+          "intended_probability": 7.692409781157039e-06,
+          "intended_loss": 11.775276184082031,
+          "intended_minus_true_logit": -11.775131225585938
+        },
+        {
+          "epoch": 17,
+          "clean_test_accuracy": 0.9921,
+          "predicted_label": 2,
+          "true_label": 2,
+          "intended_label": 7,
+          "attack_success": 0,
+          "intended_probability": 7.70999031374231e-06,
+          "intended_loss": 11.772994041442871,
+          "intended_minus_true_logit": -11.772848129272461
+        },
+        {
+          "epoch": 18,
+          "clean_test_accuracy": 0.992,
+          "predicted_label": 2,
+          "true_label": 2,
+          "intended_label": 7,
+          "attack_success": 0,
+          "intended_probability": 7.781005479046144e-06,
+          "intended_loss": 11.763825416564941,
+          "intended_minus_true_logit": -11.763678550720215
+        },
+        {
+          "epoch": 19,
+          "clean_test_accuracy": 0.992,
+          "predicted_label": 2,
+          "true_label": 2,
+          "intended_label": 7,
+          "attack_success": 0,
+          "intended_probability": 7.844794708944391e-06,
+          "intended_loss": 11.755660057067871,
+          "intended_minus_true_logit": -11.755513191223145
+        },
+        {
+          "epoch": 20,
+          "clean_test_accuracy": 0.992,
+          "predicted_label": 2,
+          "true_label": 2,
+          "intended_label": 7,
+          "attack_success": 0,
+          "intended_probability": 7.87639419286279e-06,
+          "intended_loss": 11.751640319824219,
+          "intended_minus_true_logit": -11.751492500305176
+        }
+      ]
+    },
+    {
+      "name": "fresh-no-translation-poison",
+      "epochs": 20,
+      "final": {
+        "epoch": 20,
+        "clean_test_accuracy": 0.9917,
+        "predicted_label": 2,
+        "true_label": 2,
+        "intended_label": 7,
+        "attack_success": 0,
+        "intended_probability": 0.0003606351383496076,
+        "intended_loss": 7.927643775939941,
+        "intended_minus_true_logit": -7.926825523376465
+      },
+      "maximum_intended_probability": 0.0020852156449109316,
+      "successful_epochs": 0,
+      "training_seconds": 18.406950600008713,
+      "history": [
+        {
+          "epoch": 1,
+          "clean_test_accuracy": 0.9766,
+          "predicted_label": 2,
+          "true_label": 2,
+          "intended_label": 7,
+          "attack_success": 0,
+          "intended_probability": 0.00016857971786521375,
+          "intended_loss": 8.688101768493652,
+          "intended_minus_true_logit": -8.679643630981445
+        },
+        {
+          "epoch": 2,
+          "clean_test_accuracy": 0.9836,
+          "predicted_label": 2,
+          "true_label": 2,
+          "intended_label": 7,
+          "attack_success": 0,
+          "intended_probability": 0.00027874851366505027,
+          "intended_loss": 8.185200691223145,
+          "intended_minus_true_logit": -8.181717872619629
+        },
+        {
+          "epoch": 3,
+          "clean_test_accuracy": 0.9832,
+          "predicted_label": 2,
+          "true_label": 2,
+          "intended_label": 7,
+          "attack_success": 0,
+          "intended_probability": 0.00014772455324418843,
+          "intended_loss": 8.820160865783691,
+          "intended_minus_true_logit": -8.819524765014648
+        },
+        {
+          "epoch": 4,
+          "clean_test_accuracy": 0.9844,
+          "predicted_label": 2,
+          "true_label": 2,
+          "intended_label": 7,
+          "attack_success": 0,
+          "intended_probability": 5.249109381111339e-05,
+          "intended_loss": 9.854866981506348,
+          "intended_minus_true_logit": -9.854336738586426
+        },
+        {
+          "epoch": 5,
+          "clean_test_accuracy": 0.9872,
+          "predicted_label": 2,
+          "true_label": 2,
+          "intended_label": 7,
+          "attack_success": 0,
+          "intended_probability": 4.525150507106446e-05,
+          "intended_loss": 10.003274917602539,
+          "intended_minus_true_logit": -10.002991676330566
+        },
+        {
+          "epoch": 6,
+          "clean_test_accuracy": 0.9829,
+          "predicted_label": 2,
+          "true_label": 2,
+          "intended_label": 7,
+          "attack_success": 0,
+          "intended_probability": 2.8546230169013143e-05,
+          "intended_loss": 10.463985443115234,
+          "intended_minus_true_logit": -10.46385383605957
+        },
+        {
+          "epoch": 7,
+          "clean_test_accuracy": 0.9864,
+          "predicted_label": 2,
+          "true_label": 2,
+          "intended_label": 7,
+          "attack_success": 0,
+          "intended_probability": 0.0020852156449109316,
+          "intended_loss": 6.172883033752441,
+          "intended_minus_true_logit": -6.169870853424072
+        },
+        {
+          "epoch": 8,
+          "clean_test_accuracy": 0.9908,
+          "predicted_label": 2,
+          "true_label": 2,
+          "intended_label": 7,
+          "attack_success": 0,
+          "intended_probability": 0.000406450591981411,
+          "intended_loss": 7.808048248291016,
+          "intended_minus_true_logit": -7.807136058807373
+        },
+        {
+          "epoch": 9,
+          "clean_test_accuracy": 0.9911,
+          "predicted_label": 2,
+          "true_label": 2,
+          "intended_label": 7,
+          "attack_success": 0,
+          "intended_probability": 0.0002941806451417506,
+          "intended_loss": 8.131316184997559,
+          "intended_minus_true_logit": -8.130537986755371
+        },
+        {
+          "epoch": 10,
+          "clean_test_accuracy": 0.9912,
+          "predicted_label": 2,
+          "true_label": 2,
+          "intended_label": 7,
+          "attack_success": 0,
+          "intended_probability": 0.00031134000164456666,
+          "intended_loss": 8.074625015258789,
+          "intended_minus_true_logit": -8.073887825012207
+        },
+        {
+          "epoch": 11,
+          "clean_test_accuracy": 0.9915,
+          "predicted_label": 2,
+          "true_label": 2,
+          "intended_label": 7,
+          "attack_success": 0,
+          "intended_probability": 0.00033260413329117,
+          "intended_loss": 8.008557319641113,
+          "intended_minus_true_logit": -8.007709503173828
+        },
+        {
+          "epoch": 12,
+          "clean_test_accuracy": 0.9911,
+          "predicted_label": 2,
+          "true_label": 2,
+          "intended_label": 7,
+          "attack_success": 0,
+          "intended_probability": 0.0004730268847197294,
+          "intended_loss": 7.656358242034912,
+          "intended_minus_true_logit": -7.655279636383057
+        },
+        {
+          "epoch": 13,
+          "clean_test_accuracy": 0.9917,
+          "predicted_label": 2,
+          "true_label": 2,
+          "intended_label": 7,
+          "attack_success": 0,
+          "intended_probability": 0.00035486480919644237,
+          "intended_loss": 7.9437737464904785,
+          "intended_minus_true_logit": -7.942935943603516
+        },
+        {
+          "epoch": 14,
+          "clean_test_accuracy": 0.9917,
+          "predicted_label": 2,
+          "true_label": 2,
+          "intended_label": 7,
+          "attack_success": 0,
+          "intended_probability": 0.000360025413101539,
+          "intended_loss": 7.929336071014404,
+          "intended_minus_true_logit": -7.928504943847656
+        },
+        {
+          "epoch": 15,
+          "clean_test_accuracy": 0.9917,
+          "predicted_label": 2,
+          "true_label": 2,
+          "intended_label": 7,
+          "attack_success": 0,
+          "intended_probability": 0.0003751488693524152,
+          "intended_loss": 7.888187885284424,
+          "intended_minus_true_logit": -7.8873443603515625
+        },
+        {
+          "epoch": 16,
+          "clean_test_accuracy": 0.9918,
+          "predicted_label": 2,
+          "true_label": 2,
+          "intended_label": 7,
+          "attack_success": 0,
+          "intended_probability": 0.00034855163539759815,
+          "intended_loss": 7.961724281311035,
+          "intended_minus_true_logit": -7.960929870605469
+        },
+        {
+          "epoch": 17,
+          "clean_test_accuracy": 0.9918,
+          "predicted_label": 2,
+          "true_label": 2,
+          "intended_label": 7,
+          "attack_success": 0,
+          "intended_probability": 0.0003521008766256273,
+          "intended_loss": 7.951592922210693,
+          "intended_minus_true_logit": -7.950791358947754
+        },
+        {
+          "epoch": 18,
+          "clean_test_accuracy": 0.9918,
+          "predicted_label": 2,
+          "true_label": 2,
+          "intended_label": 7,
+          "attack_success": 0,
+          "intended_probability": 0.000356141448719427,
+          "intended_loss": 7.940182685852051,
+          "intended_minus_true_logit": -7.93937349319458
+        },
+        {
+          "epoch": 19,
+          "clean_test_accuracy": 0.9918,
+          "predicted_label": 2,
+          "true_label": 2,
+          "intended_label": 7,
+          "attack_success": 0,
+          "intended_probability": 0.000359166762791574,
+          "intended_loss": 7.931723594665527,
+          "intended_minus_true_logit": -7.930908679962158
+        },
+        {
+          "epoch": 20,
+          "clean_test_accuracy": 0.9917,
+          "predicted_label": 2,
+          "true_label": 2,
+          "intended_label": 7,
+          "attack_success": 0,
+          "intended_probability": 0.0003606351383496076,
+          "intended_loss": 7.927643775939941,
+          "intended_minus_true_logit": -7.926825523376465
+        }
+      ]
+    }
+  ],
+  "activation_intervention": {
+    "model": "LeNetReLU",
+    "parameters": 61706,
+    "epsilon": 0.12549019607843137,
+    "budget": 0.04,
+    "loss": "SE",
+    "source_accuracy": 0.9936,
+    "clean_accuracy": 0.9931,
+    "poison_accuracy": 0.9942,
+    "clean_target": {
+      "case_key": 3100000000,
+      "target_id": 3703,
+      "true_label": 2,
+      "intended_label": 7,
+      "predicted_label": 2,
+      "attack_success": 0,
+      "target_correct": 1,
+      "intended_probability": 1.8983114387083333e-06,
+      "group_size": 1032,
+      "group_intended_count": 4,
+      "group_intended_rate": 0.003875968992248062,
+      "unseen_group_size": 1031,
+      "unseen_group_intended_rate": 0.0038797284190106693
+    },
+    "poison_target": {
+      "case_key": 3100000000,
+      "target_id": 3703,
+      "true_label": 2,
+      "intended_label": 7,
+      "predicted_label": 2,
+      "attack_success": 0,
+      "target_correct": 1,
+      "intended_probability": 2.5755482511158334e-06,
+      "group_size": 1032,
+      "group_intended_count": 2,
+      "group_intended_rate": 0.001937984496124031,
+      "unseen_group_size": 1031,
+      "unseen_group_intended_rate": 0.0019398642095053346
+    }
+  },
+  "existing_budget_pilots": {
+    "cifar": {
+      "development_only": true,
+      "dataset": "CIFAR10",
+      "model": "ConvNet",
+      "epsilon": 32.0,
+      "rows": [
+        {
+          "requested_budget": 0.01,
+          "loss": "similarity",
+          "successes": 1,
+          "trials": 3,
+          "planned_trials": 3,
+          "asr": 0.3333333333333333,
+          "asr_95ci": [
+            0.06149194472039621,
+            0.7923403991979522
+          ],
+          "outcomes": [
+            {
+              "case_key": 2000000000,
+              "target_id": 8745,
+              "true_label": 5,
+              "intended_label": 6,
+              "actual_poison_count": 500,
+              "actual_poison_fraction": 0.01,
+              "target": {
+                "case_key": 2000000000,
+                "target_id": 8745,
+                "true_label": 5,
+                "intended_label": 6,
+                "predicted_label": 5,
+                "attack_success": 0,
+                "target_correct": 1,
+                "intended_probability": 0.23312805593013763,
+                "group_size": 1000,
+                "group_intended_count": 40,
+                "group_intended_rate": 0.04,
+                "unseen_group_size": 999,
+                "unseen_group_intended_rate": 0.04004004004004004
+              },
+              "clean_target": {
+                "case_key": 2000000000,
+                "target_id": 8745,
+                "true_label": 5,
+                "intended_label": 6,
+                "predicted_label": 5,
+                "attack_success": 0,
+                "target_correct": 1,
+                "intended_probability": 0.00029056728817522526,
+                "group_size": 1000,
+                "group_intended_count": 34,
+                "group_intended_rate": 0.034,
+                "unseen_group_size": 999,
+                "unseen_group_intended_rate": 0.03403403403403404
+              },
+              "clean_test_accuracy": 0.8197,
+              "clean_control_accuracy": 0.8166
+            },
+            {
+              "case_key": 2100000000,
+              "target_id": 1565,
+              "true_label": 6,
+              "intended_label": 9,
+              "actual_poison_count": 500,
+              "actual_poison_fraction": 0.01,
+              "target": {
+                "case_key": 2100000000,
+                "target_id": 1565,
+                "true_label": 6,
+                "intended_label": 9,
+                "predicted_label": 9,
+                "attack_success": 1,
+                "target_correct": 0,
+                "intended_probability": 0.9306357502937317,
+                "group_size": 1000,
+                "group_intended_count": 6,
+                "group_intended_rate": 0.006,
+                "unseen_group_size": 999,
+                "unseen_group_intended_rate": 0.005005005005005005
+              },
+              "clean_target": {
+                "case_key": 2100000000,
+                "target_id": 1565,
+                "true_label": 6,
+                "intended_label": 9,
+                "predicted_label": 6,
+                "attack_success": 0,
+                "target_correct": 1,
+                "intended_probability": 0.0003040504816453904,
+                "group_size": 1000,
+                "group_intended_count": 2,
+                "group_intended_rate": 0.002,
+                "unseen_group_size": 999,
+                "unseen_group_intended_rate": 0.002002002002002002
+              },
+              "clean_test_accuracy": 0.817,
+              "clean_control_accuracy": 0.8205
+            },
+            {
+              "case_key": 2110000000,
+              "target_id": 2138,
+              "true_label": 6,
+              "intended_label": 2,
+              "actual_poison_count": 500,
+              "actual_poison_fraction": 0.01,
+              "target": {
+                "case_key": 2110000000,
+                "target_id": 2138,
+                "true_label": 6,
+                "intended_label": 2,
+                "predicted_label": 6,
+                "attack_success": 0,
+                "target_correct": 1,
+                "intended_probability": 0.0755988210439682,
+                "group_size": 1000,
+                "group_intended_count": 27,
+                "group_intended_rate": 0.027,
+                "unseen_group_size": 999,
+                "unseen_group_intended_rate": 0.02702702702702703
+              },
+              "clean_target": {
+                "case_key": 2110000000,
+                "target_id": 2138,
+                "true_label": 6,
+                "intended_label": 2,
+                "predicted_label": 6,
+                "attack_success": 0,
+                "target_correct": 1,
+                "intended_probability": 0.00037980859633535147,
+                "group_size": 1000,
+                "group_intended_count": 30,
+                "group_intended_rate": 0.03,
+                "unseen_group_size": 999,
+                "unseen_group_intended_rate": 0.03003003003003003
+              },
+              "clean_test_accuracy": 0.8181,
+              "clean_control_accuracy": 0.8165
+            }
+          ]
+        }
+      ],
+      "warning": "These cases are used to tune settings. Do not report the selected pilot ASR as an independent final estimate."
+    },
+    "mnist_incomplete": {
+      "development_only": true,
+      "dataset": "MNIST",
+      "model": "LeNet",
+      "epsilon": 32.0,
+      "rows": [
+        {
+          "requested_budget": 0.1,
+          "loss": "similarity",
+          "successes": 0,
+          "trials": 2,
+          "planned_trials": 3,
+          "asr": 0.0,
+          "asr_95ci": [
+            0.0,
+            0.6576197724933469
+          ],
+          "outcomes": [
+            {
+              "case_key": 1000000000,
+              "target_id": 4452,
+              "true_label": 8,
+              "intended_label": 0,
+              "actual_poison_count": 5923,
+              "actual_poison_fraction": 0.09871666666666666,
+              "target": {
+                "case_key": 1000000000,
+                "target_id": 4452,
+                "true_label": 8,
+                "intended_label": 0,
+                "predicted_label": 8,
+                "attack_success": 0,
+                "target_correct": 1,
+                "intended_probability": 2.0888803192065097e-05,
+                "group_size": 974,
+                "group_intended_count": 0,
+                "group_intended_rate": 0.0,
+                "unseen_group_size": 973,
+                "unseen_group_intended_rate": 0.0
+              },
+              "clean_target": {
+                "case_key": 1000000000,
+                "target_id": 4452,
+                "true_label": 8,
+                "intended_label": 0,
+                "predicted_label": 8,
+                "attack_success": 0,
+                "target_correct": 1,
+                "intended_probability": 1.1175917506989208e-06,
+                "group_size": 974,
+                "group_intended_count": 1,
+                "group_intended_rate": 0.001026694045174538,
+                "unseen_group_size": 973,
+                "unseen_group_intended_rate": 0.0010277492291880781
+              },
+              "clean_test_accuracy": 0.9236,
+              "clean_control_accuracy": 0.9937
+            },
+            {
+              "case_key": 1100000000,
+              "target_id": 3202,
+              "true_label": 7,
+              "intended_label": 5,
+              "actual_poison_count": 5421,
+              "actual_poison_fraction": 0.09035,
+              "target": {
+                "case_key": 1100000000,
+                "target_id": 3202,
+                "true_label": 7,
+                "intended_label": 5,
+                "predicted_label": 7,
+                "attack_success": 0,
+                "target_correct": 1,
+                "intended_probability": 0.0007295293034985662,
+                "group_size": 1028,
+                "group_intended_count": 0,
+                "group_intended_rate": 0.0,
+                "unseen_group_size": 1027,
+                "unseen_group_intended_rate": 0.0
+              },
+              "clean_target": {
+                "case_key": 1100000000,
+                "target_id": 3202,
+                "true_label": 7,
+                "intended_label": 5,
+                "predicted_label": 7,
+                "attack_success": 0,
+                "target_correct": 1,
+                "intended_probability": 0.00013474994921125472,
+                "group_size": 1028,
+                "group_intended_count": 0,
+                "group_intended_rate": 0.0,
+                "unseen_group_size": 1027,
+                "unseen_group_intended_rate": 0.0
+              },
+              "clean_test_accuracy": 0.9085,
+              "clean_control_accuracy": 0.9934
+            }
+          ]
+        }
+      ],
+      "warning": "These cases are used to tune settings. Do not report the selected pilot ASR as an independent final estimate."
+    }
+  },
+  "supported_findings": [
+    "Saved IDs, labels, normalization and perturbation bounds matched; modified images were used.",
+    "Source-model gradient matching produces a locally malicious update; the basic attack mechanism is present.",
+    "The matched poisoned victim fits the perturbed training examples with their true labels while retaining the correct target label.",
+    "Warm-starting from the actual trained source and disabling translations separately did not rescue this failed case.",
+    "Freshly optimizing an attack for the otherwise identical ReLU architecture also failed in this case.",
+    "The max defense approximation cannot cause the standard baseline failure because standard training has no defense regularizer."
+  ],
+  "limits": [
+    "Detailed interventions concern one preselected failed target (2 to 7), not a new 25-trial study.",
+    "These results identify weak end-to-end attack efficacy in this setup; they do not isolate a unique architecture/dataset cause or prove robustness.",
+    "CIFAR width-32 pilot had 1/3 successes; it is not the paper width-64 ConvNet or a statistically precise estimate.",
+    "The maximum-budget MNIST pilot has two completed failures; its third case and SE stage did not finish.",
+    "No new defense comparison has been launched."
+  ]
+}

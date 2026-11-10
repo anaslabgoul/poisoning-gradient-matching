@@ -40,6 +40,41 @@ in this repo), and uses 40 epochs. These are reference settings, not a promise
 that changing MNIST's poison fraction alone will reproduce that success.
 Keep development selection separate from a new independent final evaluation.
 
+### Completed local failure investigation (10 November 2026)
+
+`results/local-attack-investigation.json` preserves the local RTX 3050 diagnosis.
+The detailed interventions use the preselected failed case 3100000000 (2 to 7),
+not a newly selected successful target. All 2,400 saved modifications were
+applied to the correct IDs, with unchanged label 7 and pixel bound 32/255.
+The source gradient direction changes as intended and a small poison-only
+gradient update lowers its target loss. The matched poison-trained victim
+nevertheless fits 99.92% of those modified training images correctly and keeps
+the target classified as 2. The clean-trained victim recognizes 62.79% of those
+same modified images. Source gradient matching is therefore present, but it
+does not produce the desired final target error in this setup.
+
+Six local 20-epoch Tanh controls compared clean/poisoned data with the original
+training setup, an actual trained-source warm start, and translations disabled.
+Every evaluated epoch retained target label 2. Replacing Tanh by ReLU, keeping
+61,706 parameters and all attack settings, then freshly optimizing the poison,
+also failed in this case. Those individual interventions did not rescue it;
+they do not establish a unique cause for all 25 original failures or inherent
+robustness. The random approximation of the defense regularizer is irrelevant
+to the standard condition, which contains no such penalty.
+
+Local commands (saved input checkpoints/data are required):
+
+```powershell
+.\.venv\Scripts\python.exe experiments\investigate_local_attack.py
+.\.venv\Scripts\python.exe experiments\test_mnist_activation.py --output artifacts/local-activation-test-new
+```
+
+Windows uses its supported multiprocessing sharing strategy; Linux retains
+the configured file-descriptor strategy. A project-local CUDA PyTorch 2.8.0 /
+torchvision 0.23.0 environment was used. Ten relevant CPU checks and a full
+local 250-iteration, eight-restart GPU brewing run completed successfully.
+No new full defense study was launched.
+
 Run in remote tmux; no local computer or SSH connection needs to stay on:
 
 ```bash
