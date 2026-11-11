@@ -1,0 +1,41 @@
+{
+  "name": "Three matched full-network min-max gradient-consistency trials",
+  "dataset": "CIFAR10",
+  "model": "ResNet18",
+  "train_images": 50000,
+  "test_images": 10000,
+  "epochs": 40,
+  "batch_size": 128,
+  "case_keys": [3800000000, 3800001009, 3800002018],
+  "victim_seeds": [18001, 18002, 18003],
+  "surrogate_seed": 314159,
+  "lambdas": [1.0, 0.1, 0.001, 0.0001],
+  "victim_models": 15,
+  "additional_clean_surrogates": 1,
+  "attack": {
+    "recipe": "gradient-matching",
+    "threat_model": "single-class clean-label targeted poisoning; fixed standard-attack poisons",
+    "budget": 0.01,
+    "epsilon_pixel_units": 16.0,
+    "iterations": 250,
+    "restarts": 8,
+    "poison_batch": 128,
+    "loss": "similarity"
+  },
+  "defense": {
+    "radius_pixel_units": 16.0,
+    "inner_steps": 3,
+    "inner_step_pixel_units": 10.666666666666666,
+    "gradient_chunk_size": 16,
+    "precision": "fp32; TF32 enabled consistently",
+    "norm": "sum of squared differences over ALL trainable weights, biases and normalization affine parameters; mean over examples; no parameter-count normalization",
+    "inner": "projected sign ascent with feasible uniform random start; keep highest per-example penalty across initial point and all three iterates; approximate local maximization",
+    "outer": "CE(original training batch) + lambda * mean_i ||grad_theta CE(x_i+delta_i*,y_i) - grad_theta CE(x_i,y_i)||_2^2; stop gradient through inner optimizer; differentiate both outer gradient branches",
+    "batchnorm": "CE uses training batch statistics and updates running buffers once; both penalty branches and all ascent steps use the same frozen running statistics and disabled dropout; all BN affine parameters remain included and differentiable"
+  },
+  "selection": "Three fresh case keys and three independent victim seeds declared before any outcomes. Keep all three trials, including unsuccessful baseline attacks. No target, lambda or run selection by test outcomes.",
+  "matched": "Each trial uses identical saved poisons, initial weights, batch order and spatial augmentation draws across baseline and all lambdas; perturbations use a separate RNG.",
+  "scope": "Exactly three matched attack trials, not three multi-condition studies. No random-gradient ablation, inner-step sweep or adaptive poison evaluation requested. One independent clean surrogate is preparation, not an extra victim.",
+  "inference": "Report raw three paired outcomes and descriptive means. Three trials are preliminary evidence; no significance or broad robustness claim. These are fixed attacks, not defense-aware attacks.",
+  "failure_policy": "Never lower lambda, normalize the penalty, clip outer gradients, shorten training, or replace full-network gradients automatically. Record a nonfinite condition as a failed model and continue the other requested settings. Memory or infrastructure failures stop visibly."
+}

@@ -1,5 +1,10 @@
 # Paired-view defense comparison
 
+The full-network min-max variant and the new three-trial, four-lambda ResNet18
+study are documented separately in [BILEVEL.md](BILEVEL.md). It includes an
+inner maximization and gradients of every trainable parameter; the older
+`gradient-consistency` method below remains the final-layer random-view baseline.
+
 ## Evaluation across the target class
 
 [`results/dog-group-evaluation.json`](results/dog-group-evaluation.json) records
