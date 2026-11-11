@@ -48,7 +48,8 @@ class RunnerTests(unittest.TestCase):
             instance.model_name, instance.images, instance.labels = 'toy', x.clone(), y.clone()
             instance.dm, instance.ds = 0., 1.
             instance.config = SimpleNamespace(epochs=2, batch_size=4, radius=16., inner_steps=1,
-                gradient_chunk_size=2, inner_step_size=16., checkpoint_seconds=100000., eps=16.)
+                gradient_chunk_size=2, inner_step_size=16., checkpoint_seconds=100000., eps=16.,
+                regularizer_samples=2)
             instance.args = SimpleNamespace(dataset='CIFAR10', epochs=2, noaugment=False,
                 data_aug='default', optimization='conservative')
             # Exercise common augmentation RNG restoration, not just model state.
