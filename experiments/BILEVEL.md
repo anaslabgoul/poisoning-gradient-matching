@@ -70,7 +70,8 @@ The `wb-bilevel` tmux server, session `resnet18`, hosts a persistent controller.
 It submits exactly one exclusive, single-task, two-hour Slurm allocation at a
 time on liparis. Each allocation runs Python via srun; no training escapes the
 scheduler. The runner saves and yields after a 100-minute slice. The controller
-continues only after the explicit checkpointed/exit-75 state; unexpected
+continues only after a successful scheduler slice plus its job-specific receipt
+confirming Python exit 75 and the checkpointed state; unexpected
 infrastructure failures stop visibly rather than repeatedly launching jobs.
 Neither the laptop nor its SSH connection needs to remain on.
 

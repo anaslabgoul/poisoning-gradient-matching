@@ -4,14 +4,23 @@
 set -u
 cd "${WB_REPO:?Set WB_REPO to the isolated experiment checkout}" || exit 1
 export WB_PYTHON="${WB_PYTHON:-$HOME/.venvs/witches-brew/bin/python}"
-export WB_ROOT="$PWD/artifacts/bilevel-resnet18"
+export WB_ROOT="${WB_ROOT:-$PWD/artifacts/bilevel-resnet18}"
 mkdir -p "$WB_ROOT/scheduler"
 
 if [[ "${1:-}" == "worker" ]]; then
     # One GPU worker, even if Slurm inherits a multi-task environment.
-    srun --nodes=1 --ntasks=1 --cpus-per-task=4 --exact \
+    export WB_SLICE_RECEIPT="$WB_ROOT/scheduler/${SLURM_JOB_ID}.python-exit"
+    # Some site configurations normalize nonzero srun exits to 1. Preserve the
+    # Python status inside the managed step and map an intentional yield to a
+    # successful scheduler slice. Infrastructure failures cannot mimic a yield.
+    srun --nodes=1 --ntasks=1 --cpus-per-task=4 --exact bash -c '
         "$WB_PYTHON" -u experiments/run_bilevel_trials.py \
-        --data "$HOME/data" --output "$WB_ROOT" --slice-seconds 6000
+            --data "$HOME/data" --output "$WB_ROOT" --slice-seconds "${WB_SLICE_SECONDS:-6000}"
+        python_result=$?
+        printf "%s\n" "$python_result" > "$WB_SLICE_RECEIPT"
+        if [[ "$python_result" == "75" ]]; then exit 0; fi
+        exit "$python_result"
+    '
     exit "$?"
 fi
 
@@ -28,14 +37,20 @@ if [[ "${1:-}" == "controller" ]]; then
             --mem=12G --time=02:00:00 --export=ALL \
             --output="$WB_ROOT/scheduler/slurm-%j.log" \
             "$PWD/experiments/host_bilevel_trials.sh" worker \
-            >> "$WB_ROOT/scheduler/jobs.log" 2>&1 || result=$?
+            >> "$WB_ROOT/scheduler/jobs.log" 2>> "$WB_ROOT/scheduler/errors.log" || result=$?
+        job_id=$(tail -1 "$WB_ROOT/scheduler/jobs.log")
+        job_id="${job_id%%;*}"
+        python_result=missing
+        if [[ -f "$WB_ROOT/scheduler/${job_id}.python-exit" ]]; then
+            python_result=$(cat "$WB_ROOT/scheduler/${job_id}.python-exit")
+        fi
         phase=$("$WB_PYTHON" -c 'import json,os; p=os.environ["WB_ROOT"]+"/status.json"; print(json.load(open(p)).get("phase","unknown") if os.path.exists(p) else "missing")') || exit 1
-        if [[ "$result" == "0" && ( "$phase" == "complete" || "$phase" == "complete_with_failures" ) ]]; then
+        if [[ "$result" == "0" && "$python_result" == "0" && ( "$phase" == "complete" || "$phase" == "complete_with_failures" ) ]]; then
             printf 'Finished: %s\n' "$phase"
             exit 0
         fi
-        if [[ "$result" != "75" || "$phase" != "checkpointed" ]]; then
-            printf 'Stopped after scheduler status %s / experiment phase %s; inspect logs before resuming.\n' "$result" "$phase"
+        if [[ "$result" != "0" || "$python_result" != "75" || "$phase" != "checkpointed" ]]; then
+            printf 'Stopped after scheduler status %s / Python status %s / experiment phase %s; inspect logs before resuming.\n' "$result" "$python_result" "$phase"
             exit 1
         fi
         printf 'Checkpointed slice; submitting continuation at %s.\n' "$(date -u +%FT%TZ)"
