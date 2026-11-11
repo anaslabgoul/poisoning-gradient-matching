@@ -58,10 +58,10 @@ class BilevelTrials(Comparison):
         self.deadline = self.started + slice_seconds
         self.stop_requested = False
         super().__init__(config)
-        if len({case['target_id'] for case in self.cases}) != 3:
-            raise ValueError('The declared case keys must produce three distinct target images.')
+        if len({case['target_id'] for case in self.cases}) != protocol.get('trial_count', 3):
+            raise ValueError('Declared case keys must produce the protocol number of distinct targets.')
         self.protocol = protocol
-        self.manifest['evaluation'] = 'Three matched fixed standard-attack poison trials; full-network per-example min-max defense; not adaptive poisoning.'
+        self.manifest['evaluation'] = protocol.get('evaluation', 'Three matched fixed standard-attack poison trials; full-network per-example min-max defense; not adaptive poisoning.')
         self.manifest['gradient_penalty'] = protocol['defense']['norm']
         self.manifest['batchnorm'] = protocol['defense']['batchnorm']
         self.manifest['protocol'] = protocol
@@ -74,6 +74,9 @@ class BilevelTrials(Comparison):
     def out_of_time(self, margin=180):
         return self.stop_requested or time.monotonic() > self.deadline-margin
 
+    def poison_path(self, case):
+        return self.out/'poisons'/(str(case['key'])+'.pt')
+
     def train_condition(self, name, seed, weight=None, case=None, delta=None):
         result_path = self.out/'runs'/(name+'.json')
         model_path = self.out/'models'/(name+'.pt')
@@ -84,6 +87,8 @@ class BilevelTrials(Comparison):
             raise SliceExpired()
         seed_all(seed)
         model = get_model(self.model_name, self.args.dataset).to(self.device)
+        if getattr(self.config, 'channels_last', False):
+            model = model.to(memory_format=torch.channels_last)
         optimizer, scheduler = get_optimizers(model, self.args, training_strategy(self.model_name, self.args))
         generators = [torch.Generator(device=self.device).manual_seed(seed+offset) for offset in (100, 200, 300)]
         images = self.images
@@ -147,7 +152,9 @@ class BilevelTrials(Comparison):
                         _, metrics = bilevel_backward(model, x, y, weight,
                             radius=self.config.radius, steps=self.config.inner_steps,
                             chunk_size=self.config.gradient_chunk_size, dm=self.dm, ds=self.ds,
-                            generator=generators[2], step_size=self.config.inner_step_size)
+                            generator=generators[2], step_size=self.config.inner_step_size,
+                            classification_bf16=getattr(self.config, 'precision', 'fp32')=='bf16',
+                            regularizer_samples=getattr(self.config, 'regularizer_samples', None))
                     if not all(p.grad is None or torch.isfinite(p.grad).all() for p in model.parameters()):
                         raise FloatingPointError('Nonfinite outer parameter gradient.')
                     optimizer.step()
@@ -183,7 +190,7 @@ class BilevelTrials(Comparison):
             if case is not None:
                 target = next(t for t in metrics['targets'] if t['case_key']==case['key'])
                 result.update(attack_success=target['attack_success'], target=target,
-                    poison_sha256=hashlib.sha256((self.out/'poisons'/(str(case['key'])+'.pt')).read_bytes()).hexdigest())
+                    poison_sha256=hashlib.sha256(self.poison_path(case).read_bytes()).hexdigest())
             save_checkpoint(model_path, {k:v.cpu() for k,v in model.state_dict().items()})
             write_json(result_path, result)
             # This file belongs only to this named condition and is superseded by
@@ -224,9 +231,10 @@ class BilevelTrials(Comparison):
                 targeted_asr=None if not completed else float(np.mean([r['attack_success'] for r in completed])),
                 accuracy=None if not completed else float(np.mean([r['clean_test_accuracy'] for r in completed])),
                 paired=pairs))
-        result = dict(attempted=len(rows), expected=15, all_attempted=len(rows)==15,
-            all_succeeded=len(rows)==15 and all(r['status']=='complete' for r in rows), summary=summary, records=rows,
-            interpretation=self.protocol['inference'], uncertainty='Only three independent target/seed pairs; raw paired outcomes and descriptive means, no significance claim. Failed conditions are excluded from rates and explicitly counted.')
+        expected = self.protocol.get('victim_models', 15)
+        result = dict(attempted=len(rows), expected=expected, all_attempted=len(rows)==expected,
+            all_succeeded=len(rows)==expected and all(r['status']=='complete' for r in rows), summary=summary, records=rows,
+            interpretation=self.protocol['inference'], uncertainty=self.protocol.get('uncertainty', 'Only three independent target/seed pairs; raw paired outcomes and descriptive means, no significance claim. Failed conditions are excluded from rates and explicitly counted.'))
         write_json(self.out/'results.json', result)
         return result
 
@@ -250,7 +258,7 @@ class BilevelTrials(Comparison):
                 self.summarize_trials()
         final = self.summarize_trials()
         write_json(self.out/'status.json', dict(phase='complete' if final['all_succeeded'] else 'complete_with_failures',
-            attempted=final['attempted'], expected=15))
+            attempted=final['attempted'], expected=self.protocol.get('victim_models', 15)))
 
 
 def make_config(args, protocol):

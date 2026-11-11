@@ -1,6 +1,7 @@
 """Mathematical and state-isolation checks for full-network min-max training."""
 import copy
 import unittest
+from unittest.mock import patch
 
 import torch
 import torch.nn.functional as F
@@ -86,6 +87,22 @@ class BilevelTests(unittest.TestCase):
         _, metrics = bilevel_backward(self.model, self.x, self.y, 0.)
         expected = F.cross_entropy(other(self.x), self.y)
         expected.backward()
+        torch.testing.assert_close(metrics['loss'], expected.detach())
+        for a, b in zip(self.model.parameters(), other.parameters()):
+            torch.testing.assert_close(a.grad, b.grad)
+
+    def test_sampled_images_use_sample_mean_not_full_batch_denominator(self):
+        other = copy.deepcopy(self.model)
+        seed, weight = 41, .1
+        selected = torch.randperm(len(self.x), generator=torch.Generator().manual_seed(seed))[:1]
+        delta = torch.full_like(self.x[selected], .01)
+        expected = F.cross_entropy(other(self.x), self.y) + weight*gradient_penalties(
+            other, self.x[selected], self.y[selected], delta).mean()
+        expected.backward()
+        with patch('forest.victims.bilevel.maximize_gradient_difference', return_value=(
+                delta, dict(initial=torch.zeros(1), maximized=torch.zeros(1)))):
+            _, metrics = bilevel_backward(self.model, self.x, self.y, weight,
+                regularizer_samples=1, generator=torch.Generator().manual_seed(seed))
         torch.testing.assert_close(metrics['loss'], expected.detach())
         for a, b in zip(self.model.parameters(), other.parameters()):
             torch.testing.assert_close(a.grad, b.grad)

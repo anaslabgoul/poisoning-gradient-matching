@@ -11,9 +11,21 @@ from unittest.mock import patch
 import torch
 
 from experiments.run_bilevel_trials import BilevelTrials, SliceExpired, make_config
+from experiments.run_bilevel_overnight import slice_outcome
 
 
 class RunnerTests(unittest.TestCase):
+    def test_overnight_is_one_trial_and_cannot_continue_after_cutoff(self):
+        protocol = json.loads(Path('experiments/protocols/bilevel-resnet18-overnight-once.json').read_text())
+        self.assertEqual(protocol['victim_models'], 2)
+        self.assertEqual(protocol['lambdas'], [.001])
+        self.assertEqual(protocol['train_images'], 50000)
+        self.assertEqual(protocol['model'], 'ResNet18')
+        self.assertEqual(protocol['defense']['regularizer_samples_per_batch'], 8)
+        self.assertEqual(slice_outcome(10000, 0), ('checkpointed', 75))
+        self.assertEqual(slice_outcome(10000, 9000), ('deadline_reached', 0))
+        self.assertEqual(slice_outcome(10000, 11000), ('deadline_reached', 0))
+
     def test_frozen_scope(self):
         protocol = json.loads(Path('experiments/protocols/bilevel-resnet18-three-trials.json').read_text())
         config = make_config(argparse.Namespace(output='artifacts/test', data='data'), protocol)

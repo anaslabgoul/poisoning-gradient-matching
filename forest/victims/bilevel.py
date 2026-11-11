@@ -110,35 +110,49 @@ training uses a Danskin-style update, without unrolling the ascent trajectory.
 
 
 def bilevel_backward(model, inputs, labels, weight, radius=16., steps=3,
-                     chunk_size=2, dm=0., ds=1., generator=None, step_size=None):
+                     chunk_size=2, dm=0., ds=1., generator=None, step_size=None,
+                     classification_bf16=False, regularizer_samples=None):
     """Accumulate exact outer CE + lambda * mean(full-gradient penalty) grads.
 
 Chunking changes memory use only, not the per-example objective. Classification
 uses the ordinary training-mode batch; penalty branches use fixed BN buffers.
-Caller zeros gradients and steps the optimizer. All calculations use FP32.
+    Caller zeros gradients and steps the optimizer. Penalties use FP32. Optional
+    BF16 classification preserves the previous benchmark's baseline precision.
+    An optional uniform subset of images provides an unbiased Monte Carlo
+    estimate of the batch's per-example penalty; it never subsets parameters.
 """
     if not math.isfinite(weight) or weight < 0 or chunk_size < 1:
         raise ValueError('Require a finite nonnegative lambda and positive chunk size.')
     if inputs.dtype != torch.float32:
         raise ValueError('Full-network training requires FP32 inputs.')
-    logits = model(inputs)
-    classification = F.cross_entropy(logits, labels)
+    with torch.autocast(device_type=inputs.device.type, dtype=torch.bfloat16,
+                        enabled=classification_bf16):
+        logits = model(inputs)
+        classification = F.cross_entropy(logits.float(), labels)
     if not torch.isfinite(classification):
         raise FloatingPointError('Nonfinite classification loss.')
     classification.backward()
     total, initial, maximized = inputs.new_zeros(()), inputs.new_zeros(()), inputs.new_zeros(())
     if weight and radius:
-        for start in range(0, len(inputs), chunk_size):
-            x, y = inputs[start:start+chunk_size], labels[start:start+chunk_size]
+        if regularizer_samples is not None:
+            if regularizer_samples < 1:
+                raise ValueError('Regularizer sample count must be positive.')
+            selected = torch.randperm(len(inputs), device=inputs.device, generator=generator)[:regularizer_samples]
+            penalty_inputs, penalty_labels = inputs[selected], labels[selected]
+        else:
+            penalty_inputs, penalty_labels = inputs, labels
+        count = len(penalty_inputs)
+        for start in range(0, count, chunk_size):
+            x, y = penalty_inputs[start:start+chunk_size], penalty_labels[start:start+chunk_size]
             delta, diagnostics = maximize_gradient_difference(
                 model, x, y, radius, steps, step_size, dm, ds, generator)
             penalties = gradient_penalties(model, x, y, delta, dm, ds)
             if not torch.isfinite(penalties).all():
                 raise FloatingPointError('Nonfinite outer full-network penalty.')
-            (weight * penalties.sum() / len(inputs)).backward()
-            total += penalties.detach().sum() / len(inputs)
-            initial += diagnostics['initial'].sum() / len(inputs)
-            maximized += diagnostics['maximized'].sum() / len(inputs)
+            (weight * penalties.sum() / count).backward()
+            total += penalties.detach().sum() / count
+            initial += diagnostics['initial'].sum() / count
+            maximized += diagnostics['maximized'].sum() / count
     return logits.detach(), dict(classification=classification.detach(), regularizer=total,
                                   loss=classification.detach() + weight * total,
                                   inner_initial=initial, inner_maximized=maximized)
