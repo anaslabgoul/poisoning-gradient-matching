@@ -103,6 +103,7 @@ class BilevelTrials(Comparison):
         epoch, offset, order = 0, 0, None
         history, totals, batches = [], torch.zeros(5, device=self.device), 0
         elapsed, peak = 0., 0
+        last_finite_metrics = None
         if checkpoint_path.exists():
             # This pickle is created solely by this runner in our output directory;
             # Python/NumPy RNG states require weights_only=False. Never load uploads.
@@ -149,24 +150,36 @@ class BilevelTrials(Comparison):
                         metrics = dict(loss=loss.detach(), classification=loss.detach(),
                             regularizer=loss.detach()*0, inner_initial=loss.detach()*0, inner_maximized=loss.detach()*0)
                     else:
+                        diagnose_gradients = getattr(self.config, 'gradient_diagnostics', False) and (
+                            (epoch==0 and batches<32) or time.monotonic()-last_saved>self.config.checkpoint_seconds)
                         _, metrics = bilevel_backward(model, x, y, weight,
                             radius=self.config.radius, steps=self.config.inner_steps,
                             chunk_size=self.config.gradient_chunk_size, dm=self.dm, ds=self.ds,
                             generator=generators[2], step_size=self.config.inner_step_size,
                             classification_bf16=getattr(self.config, 'precision', 'fp32')=='bf16',
-                            regularizer_samples=getattr(self.config, 'regularizer_samples', None))
+                            regularizer_samples=getattr(self.config, 'regularizer_samples', None),
+                            gradient_diagnostics=diagnose_gradients)
                     if not all(p.grad is None or torch.isfinite(p.grad).all() for p in model.parameters()):
                         raise FloatingPointError('Nonfinite outer parameter gradient.')
                     optimizer.step()
                     if not all(torch.isfinite(p).all() for p in model.parameters()):
                         raise FloatingPointError('Nonfinite updated parameter.')
+                    if getattr(self.config, 'validate_buffers', False) and not all(
+                            torch.isfinite(buffer).all() for buffer in model.buffers()):
+                        raise FloatingPointError('Nonfinite normalization buffer.')
                     totals += torch.stack([metrics[k] for k in ('loss','classification','regularizer','inner_initial','inner_maximized')])*len(idx)
                     offset += len(idx)
                     batches += 1
                     progress = dict(phase='training', condition=name, epoch=epoch+1, epochs=self.config.epochs,
                         processed=offset, train_images=len(order), lambda_weight=weight,
                         metrics={k: float(v) for k, v in metrics.items()}, pid=os.getpid())
+                    last_finite_metrics = progress['metrics']
                     write_json(self.out/'status.json', progress)
+                    if getattr(self.config, 'gradient_diagnostics', False) and epoch==0 and batches<=32:
+                        print(json.dumps(dict(event='early_batch', batch=batches, **progress)),flush=True)
+                        if batches==32:
+                            print(json.dumps(dict(event='early_stability_passed',condition=name,batches=32,
+                                interpretation='Continue this same training; early finiteness does not establish full stability.')),flush=True)
                     if time.monotonic()-last_saved > self.config.checkpoint_seconds:
                         checkpoint()
                         last_saved = time.monotonic()
@@ -205,6 +218,7 @@ class BilevelTrials(Comparison):
             result = dict(name=name, status='numerical_failure', seed=seed, lambda_weight=weight,
                 case_key=case['key'], target_id=case['target_id'], epoch=epoch+1, offset=offset,
                 error=str(error), history=history,
+                last_finite_metrics=last_finite_metrics,
                 interpretation='Failed optimization; never count this as a prevented attack or silently alter lambda.')
             write_json(result_path, result)
             print(json.dumps(dict(event='condition_failed', **result)), flush=True)

@@ -111,7 +111,8 @@ training uses a Danskin-style update, without unrolling the ascent trajectory.
 
 def bilevel_backward(model, inputs, labels, weight, radius=16., steps=3,
                      chunk_size=2, dm=0., ds=1., generator=None, step_size=None,
-                     classification_bf16=False, regularizer_samples=None):
+                     classification_bf16=False, regularizer_samples=None,
+                     gradient_diagnostics=False):
     """Accumulate exact outer CE + lambda * mean(full-gradient penalty) grads.
 
 Chunking changes memory use only, not the per-example objective. Classification
@@ -132,6 +133,8 @@ uses the ordinary training-mode batch; penalty branches use fixed BN buffers.
     if not torch.isfinite(classification):
         raise FloatingPointError('Nonfinite classification loss.')
     classification.backward()
+    parameters = tuple(p for p in model.parameters() if p.grad is not None) if gradient_diagnostics else ()
+    ce_gradients = [p.grad.detach().clone() for p in parameters]
     total, initial, maximized = inputs.new_zeros(()), inputs.new_zeros(()), inputs.new_zeros(())
     if weight and radius:
         if regularizer_samples is not None:
@@ -153,6 +156,16 @@ uses the ordinary training-mode batch; penalty branches use fixed BN buffers.
             total += penalties.detach().sum() / count
             initial += diagnostics['initial'].sum() / count
             maximized += diagnostics['maximized'].sum() / count
-    return logits.detach(), dict(classification=classification.detach(), regularizer=total,
-                                  loss=classification.detach() + weight * total,
-                                  inner_initial=initial, inner_maximized=maximized)
+    metrics = dict(classification=classification.detach(), regularizer=total,
+                   loss=classification.detach() + weight * total,
+                   inner_initial=initial, inner_maximized=maximized)
+    if gradient_diagnostics:
+        penalty_gradients = [p.grad.detach()-g for p,g in zip(parameters,ce_gradients)]
+        ce_squared = sum(g.double().square().sum() for g in ce_gradients)
+        penalty_squared = sum(g.double().square().sum() for g in penalty_gradients)
+        dot = sum((a.double()*b.double()).sum() for a,b in zip(ce_gradients,penalty_gradients))
+        metrics.update(ce_gradient_norm=ce_squared.sqrt(),
+            weighted_regularizer_gradient_norm=penalty_squared.sqrt(),
+            regularizer_to_ce_gradient_ratio=(penalty_squared/(ce_squared+1e-60)).sqrt(),
+            gradient_cosine=dot/((ce_squared*penalty_squared).sqrt()+1e-30))
+    return logits.detach(), metrics

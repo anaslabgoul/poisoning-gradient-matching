@@ -91,6 +91,17 @@ class BilevelTests(unittest.TestCase):
         for a, b in zip(self.model.parameters(), other.parameters()):
             torch.testing.assert_close(a.grad, b.grad)
 
+    def test_gradient_diagnostics_preserve_training_update(self):
+        models = [copy.deepcopy(self.model),copy.deepcopy(self.model)]
+        for model, enabled in zip(models,(False,True)):
+            _, metrics = bilevel_backward(model,self.x,self.y,1e-8,steps=1,
+                regularizer_samples=2,generator=torch.Generator().manual_seed(83),gradient_diagnostics=enabled)
+        for first,second in zip(models[0].parameters(),models[1].parameters()):
+            torch.testing.assert_close(first.grad,second.grad,atol=0,rtol=0)
+        self.assertGreater(float(metrics['ce_gradient_norm']),0)
+        self.assertGreaterEqual(float(metrics['weighted_regularizer_gradient_norm']),0)
+        self.assertLessEqual(abs(float(metrics['gradient_cosine'])),1+1e-6)
+
     def test_sampled_images_use_sample_mean_not_full_batch_denominator(self):
         other = copy.deepcopy(self.model)
         seed, weight = 41, .1
