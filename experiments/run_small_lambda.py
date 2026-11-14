@@ -39,13 +39,17 @@ def verify_inputs(protocol,source):
 def validate_protocol(protocol):
     allowed=([1e-8,1e-10],[1e-7,1e-6,1e-5])
     count=len(protocol['lambdas'])
-    if (protocol['lambdas'] not in allowed or protocol['trial_count']!=1 or
-        protocol['new_victim_trainings']!=count or protocol['victim_models']!=count+1 or
-        protocol['reused_undefended_models']!=1 or protocol['additional_clean_surrogates']!=0 or
+    fresh_baseline=protocol.get('source_victim_seeds') is not None
+    requested=(protocol['lambdas']==[1e-7] and protocol['victim_seeds']==[18002]
+               and protocol['source_victim_seeds']==[18001]) if fresh_baseline else (
+               protocol['lambdas'] in allowed and protocol['victim_seeds']==[18001])
+    if (not requested or protocol['trial_count']!=1 or
+        protocol['new_victim_trainings']!=count+int(fresh_baseline) or protocol['victim_models']!=count+1 or
+        protocol['reused_undefended_models']!=int(not fresh_baseline) or protocol['additional_clean_surrogates']!=0 or
         protocol['dataset']!='CIFAR10' or protocol['model']!='ResNet18' or
         protocol['train_images']!=50000 or protocol['test_images']!=10000 or
         protocol['epochs']!=40 or protocol['batch_size']!=128 or
-        protocol['case_keys']!=[3800000000] or protocol['victim_seeds']!=[18001] or
+        protocol['case_keys']!=[3800000000] or
         protocol['defense']['radius_pixel_units']!=16. or protocol['defense']['inner_steps']!=3 or
         protocol['defense']['regularizer_samples_per_batch']!=8 or
         protocol['optimizer']!=dict(learning_rate=.1,momentum=.9,nesterov=True,
@@ -63,25 +67,32 @@ class SmallLambdaTrials(BilevelTrials):
         return self.source/'poisons'/(str(case['key'])+'.pt')
 
     def run_cached(self):
-        base=copy.deepcopy(self.baseline)
-        base['reused_from']=str(self.source/'runs/trial-0-standard.json')
-        base['cached_model_sha256']=self.protocol['frozen_files']['models/trial-0-standard.pt']
-        write_json(self.out/'runs/trial-0-standard.json',base)
+        reuse_baseline=bool(self.protocol['reused_undefended_models'])
+        if reuse_baseline:
+            base=copy.deepcopy(self.baseline)
+            base['reused_from']=str(self.source/'runs/trial-0-standard.json')
+            base['cached_model_sha256']=self.protocol['frozen_files']['models/trial-0-standard.pt']
+            write_json(self.out/'runs/trial-0-standard.json',base)
         self.summarize_trials()
         case=self.cases[0]
         poison=load_state(self.poison_path(case))
         if poison['poison_ids'].tolist()!=case['poison_ids'] or int(poison['target_id'])!=case['target_id']:
             raise RuntimeError('Poison target or training row alignment changed.')
         write_json(self.out/'inputs_verified.json',dict(frozen_files=self.protocol['frozen_files'],
-            baseline_reused=True,new_poison_generation=False,source_retraining=False,
+            baseline_reused=reuse_baseline,new_poison_generation=False,source_retraining=False,
+            comparison_seed=self.config.seeds[0],
             optimizer=self.protocol['optimizer'],regularizer_samples=8))
         for weight in self.protocol['lambdas']:
             self.train_condition('trial-0-lambda-'+str(weight),self.config.seeds[0],weight,case,poison['delta'])
             self.summarize_trials()
+        if not reuse_baseline:
+            self.train_condition('trial-0-standard',self.config.seeds[0],None,case,poison['delta'])
+            self.summarize_trials()
         final=self.summarize_trials()
         write_json(self.out/'status.json',dict(phase='complete' if final['all_succeeded'] else 'complete_with_failures',
             attempted=final['attempted'],expected=self.protocol['victim_models'],
-            new_defended_trainings=self.protocol['new_victim_trainings'],cached_baselines=1))
+            new_defended_trainings=len(self.protocol['lambdas']),
+            new_undefended_trainings=int(not reuse_baseline),cached_baselines=int(reuse_baseline)))
 
 
 def main(default_protocol='experiments/protocols/bilevel-small-lambda.json',
@@ -101,7 +112,10 @@ def main(default_protocol='experiments/protocols/bilevel-small-lambda.json',
         return 0
     try:
         source=Path(protocol['baseline_directory']).expanduser().resolve()
-        manifest,baseline=verify_inputs(protocol,source)
+        source_protocol=copy.deepcopy(protocol)
+        if protocol.get('source_victim_seeds') is not None:
+            source_protocol['victim_seeds']=protocol['source_victim_seeds']
+        manifest,baseline=verify_inputs(source_protocol,source)
         if torch.__version__!=manifest['torch']:
             raise RuntimeError('PyTorch version differs from the cached baseline: '+torch.__version__)
         config=make_config(args,protocol)

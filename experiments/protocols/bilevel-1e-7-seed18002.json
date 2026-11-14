@@ -1,0 +1,75 @@
+{
+  "name": "Fixed lambda 1e-7 with a new matched training seed 18002",
+  "trial_count": 1,
+  "dataset": "CIFAR10",
+  "model": "ResNet18",
+  "train_images": 50000,
+  "test_images": 10000,
+  "epochs": 40,
+  "batch_size": 128,
+  "case_keys": [
+    3800000000
+  ],
+  "victim_seeds": [
+    18002
+  ],
+  "surrogate_seed": 314159,
+  "lambdas": [
+    1e-07
+  ],
+  "victim_models": 2,
+  "new_victim_trainings": 2,
+  "reused_undefended_models": 0,
+  "additional_clean_surrogates": 0,
+  "hard_stop_utc": "2026-11-15T05:00:00+00:00",
+  "hard_stop_local": "15 November 2026, 07:00 Asia/Hebron",
+  "baseline_directory": "~/poisoning-gradient-bilevel-overnight/artifacts/bilevel-overnight",
+  "frozen_files": {
+    "manifest.json": "b4c23d41b306a924aaccb8abce47a19818577b01a64845a1773a174f5320b849",
+    "runs/trial-0-standard.json": "41e7d159b112a70076b4d5a68c18409dd5f9c9922a69ec1aebb1448a33283bea",
+    "models/trial-0-standard.pt": "b26a678ade77d607fe4e5f7304e83fb10d2bb6b8ef2a215f53e28a2e0c7d3572",
+    "poisons/3800000000.pt": "8851ec4f9b53808fed5e7f72a85500bdad7144bab82f68795d5cfbe015453487"
+  },
+  "attack": {
+    "recipe": "gradient-matching",
+    "threat_model": "Reuse the exact saved single-class clean-label targeted poison; no new brewing",
+    "budget": 0.01,
+    "epsilon_pixel_units": 16.0,
+    "iterations": 250,
+    "restarts": 8,
+    "poison_batch": 128,
+    "loss": "similarity"
+  },
+  "defense": {
+    "radius_pixel_units": 16.0,
+    "inner_steps": 3,
+    "inner_step_pixel_units": 10.666666666666666,
+    "gradient_chunk_size": 8,
+    "regularizer_samples_per_batch": 8,
+    "precision": "FP32 inputs, parameters, CE and penalties; TF32 enabled, as in the saved baseline",
+    "norm": "Mean per-example squared gradient difference summed over every trainable parameter, including convolution/classifier weights, biases and BN affine parameters. Uniform sample of 8 penalty images from each 128-image classification batch; no parameter subsampling or parameter-count normalization.",
+    "inner": "Feasible random pixel start, three projected sign-ascent steps, retain best per-example point; hold model and normalization statistics fixed",
+    "outer": "CE on all classification images plus fixed lambda times the mean sampled-image full-network penalty. Stop gradients through the inner trajectory; differentiate both outer gradient branches.",
+    "batchnorm": "CE updates BN buffers once. Both penalty branches and all ascent iterations use fixed BN running statistics and disabled dropout; affine parameters remain differentiable."
+  },
+  "optimizer": {
+    "learning_rate": 0.1,
+    "momentum": 0.9,
+    "nesterov": true,
+    "weight_decay": 0.0005,
+    "clipping": false,
+    "warmup": false,
+    "adaptive_lambda": false,
+    "update_rescaling": false
+  },
+  "early_stability_batches": 32,
+  "selection": "One predeclared new training seed 18002; the same known target and saved poison as before. No seed search, success filtering, new targets or new poison generation.",
+  "evaluation": "Lambda 1e-7 versus a newly trained undefended control, both with seed 18002. The seed changes initialization and dedicated shuffle, augmentation and defense RNG streams. The exact target, poison and all mathematical hyperparameters are unchanged.",
+  "inference": "One target/seed pair. Report each raw target outcome, test accuracy, finite/failure status and optimization diagnostics. No population success-rate or significance claim.",
+  "uncertainty": "One known target and one new paired training seed; no population robustness or statistical significance claim.",
+  "failure_policy": "Record a numerical failure without changing lambda, seed or optimizer settings. Attempt the matched undefended control with the same new seed. No further seeds or new attacks. Checkpoint between scheduler slices and stop by the fixed cutoff.",
+  "source_victim_seeds": [
+    18001
+  ],
+  "matched": "Both new models use seed 18002, identical poisoned data, initial weights, minibatch order and spatial draws; the defense sampling RNG remains separate. The cached seed-18001 baseline is verified only as source provenance, never reused as this comparison control."
+}

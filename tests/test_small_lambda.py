@@ -57,6 +57,42 @@ class SmallLambdaTests(unittest.TestCase):
             self.assertEqual(status['new_defended_trainings'],3)
             self.assertEqual(status['cached_baselines'],1)
 
+    def test_new_seed_requires_a_new_matched_control(self):
+        p=json.loads(Path('experiments/protocols/bilevel-1e-7-seed18002.json').read_text())
+        validate_protocol(p)
+        self.assertEqual(p['lambdas'],[1e-7])
+        self.assertEqual(p['victim_seeds'],[18002])
+        self.assertEqual(p['new_victim_trainings'],2)
+        self.assertEqual(p['reused_undefended_models'],0)
+        p['victim_seeds']=[18001]
+        with self.assertRaises(ValueError):
+            validate_protocol(p)
+
+    def test_new_seed_runner_does_not_copy_the_old_seed_baseline(self):
+        p=json.loads(Path('experiments/protocols/bilevel-1e-7-seed18002.json').read_text())
+        with tempfile.TemporaryDirectory() as directory:
+            trial=object.__new__(SmallLambdaTrials)
+            trial.out=Path(directory)
+            trial.source=Path(directory)/'cached'
+            trial.protocol=p
+            trial.baseline=dict(name='trial-0-standard',seed=18001)
+            trial.cases=[dict(key=3800000000,target_id=7171,poison_ids=[4,7])]
+            trial.config=SimpleNamespace(seeds=[18002])
+            trial.summarize_trials=Mock(return_value=dict(all_succeeded=True,attempted=2))
+            trial.train_condition=Mock()
+            with patch('experiments.run_small_lambda.load_state',return_value=dict(
+                    poison_ids=torch.tensor([4,7]),target_id=7171,delta=torch.zeros(2))):
+                trial.run_cached()
+            calls=trial.train_condition.call_args_list
+            self.assertEqual([(c.args[1],c.args[2]) for c in calls],[(18002,1e-7),(18002,None)])
+            self.assertFalse((trial.out/'runs/trial-0-standard.json').exists())
+            verified=json.loads((trial.out/'inputs_verified.json').read_text())
+            self.assertFalse(verified['baseline_reused'])
+            status=json.loads((trial.out/'status.json').read_text())
+            self.assertEqual(status['new_defended_trainings'],1)
+            self.assertEqual(status['new_undefended_trainings'],1)
+            self.assertEqual(status['cached_baselines'],0)
+
     def test_cached_assets_are_verified_before_reuse(self):
         with tempfile.TemporaryDirectory() as directory:
             root=Path(directory)
