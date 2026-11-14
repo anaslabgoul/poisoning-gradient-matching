@@ -49,6 +49,21 @@ def load_state(path):
     return torch.load(path, map_location='cpu', weights_only=True)
 
 
+def target_confidence(logits, true_label, intended_label):
+    """Natural-log confidence from logits; remains valid if exp(log_p) underflows."""
+    if logits.ndim != 1 or not torch.isfinite(logits).all():
+        raise FloatingPointError('Nonfinite or invalid target logits.')
+    log_p = F.log_softmax(logits.detach().double(), dim=0)
+    predicted = int(logits.argmax())
+    return dict(predicted_label=predicted, attack_success=int(predicted == intended_label),
+                target_correct=int(predicted == true_label),
+                true_probability=float(log_p[true_label].exp()),
+                intended_probability=float(log_p[intended_label].exp()),
+                true_log_probability=float(log_p[true_label]),
+                intended_log_probability=float(log_p[intended_label]),
+                true_minus_intended_log_probability=float(log_p[true_label]-log_p[intended_label]))
+
+
 def criterion(model, outputs, labels):
     return F.cross_entropy(outputs.float(), labels)
 
@@ -172,25 +187,27 @@ class Comparison:
     def evaluate(self, model):
         model.eval()
         correct, total, loss_sum = 0, 0, 0.
-        predictions, probabilities = [], []
+        predictions, target_logits = [], {}
         with torch.no_grad():
             for start in range(0, len(self.test_labels), 256):
                 stop = start + 256
                 with self.autocast():
                     outputs = model(self.test_images[start:stop]).float()
+                if not torch.isfinite(outputs).all():
+                    raise FloatingPointError('Nonfinite evaluation logits.')
                 labels = self.test_labels[start:stop]
                 mask = self.accuracy_mask[start:stop]
                 correct += int((outputs.argmax(1)[mask] == labels[mask]).sum())
                 total += int(mask.sum())
                 loss_sum += float(F.cross_entropy(outputs[mask], labels[mask], reduction='sum'))
                 predictions.extend(outputs.argmax(1).tolist())
-                probabilities.extend(outputs.softmax(1).tolist())
+                for case in self.cases:
+                    if start <= case['target_id'] < stop:
+                        target_logits[case['target_id']] = outputs[case['target_id']-start].detach().clone()
         targets = [dict(case_key=case['key'], target_id=case['target_id'],
                         true_label=case['true_label'], intended_label=case['intended_label'],
-                        predicted_label=predictions[case['target_id']],
-                        attack_success=int(predictions[case['target_id']] == case['intended_label']),
-                        target_correct=int(predictions[case['target_id']] == case['true_label']),
-                        intended_probability=probabilities[case['target_id']][case['intended_label']])
+                        **target_confidence(target_logits[case['target_id']],
+                                            case['true_label'], case['intended_label']))
                    for case in self.cases]
         label_list = self.test_labels.tolist()
         for target in targets:

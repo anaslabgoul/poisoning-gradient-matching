@@ -20,7 +20,8 @@ import torch
 import torch.nn.functional as F
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
-from experiments.compare_defenses import Comparison, load_state, seed_all, write_json
+from experiments.compare_defenses import Comparison, load_state, seed_all, write_json, target_confidence
+from forest.victims.bilevel import fixed_statistics
 from forest.victims.bilevel import bilevel_backward
 from forest.victims.models import get_model
 from forest.victims.optimization_strategy import training_strategy
@@ -52,6 +53,31 @@ def restore_rng(state, generators):
         generator.set_state(saved.cpu())
 
 
+def optimizer_observation(model, optimizer, before):
+    """Read-only post-update diagnostics. FP64 reductions avoid norm overflow."""
+    def norm(values):
+        return float(sum(v.detach().double().square().sum() for v in values).sqrt())
+    layers, batchnorm = {}, {}
+    for name, parameter in model.named_parameters():
+        if parameter.grad is not None:
+            layer = name.rsplit('.', 1)[0]
+            value = parameter.grad.detach().double().square().sum()
+            layers[layer] = layers.get(layer, 0.) + value
+    for name, module in model.named_modules():
+        if isinstance(module, torch.nn.modules.batchnorm._BatchNorm):
+            batchnorm[name] = dict(minimum_running_variance=float(module.running_var.min()),
+                                   maximum_running_variance=float(module.running_var.max()),
+                                   maximum_running_mean_abs=float(module.running_mean.abs().max()))
+    momentum = [state['momentum_buffer'] for state in optimizer.state.values()
+                if 'momentum_buffer' in state]
+    return dict(parameter_norm=norm(model.parameters()),
+                parameter_update_norm=norm([p.detach().double()-old.double()
+                                           for p, old in zip(model.parameters(), before)]),
+                momentum_norm=norm(momentum) if momentum else 0.,
+                total_gradient_norm_by_layer={k: float(v.sqrt()) for k, v in layers.items()},
+                batchnorm=batchnorm)
+
+
 class BilevelTrials(Comparison):
     def __init__(self, config, protocol, slice_seconds):
         self.started = time.monotonic()
@@ -76,6 +102,25 @@ class BilevelTrials(Comparison):
 
     def poison_path(self, case):
         return self.out/'poisons'/(str(case['key'])+'.pt')
+
+    def observe_targets(self, model):
+        """Observe confidence without updating BN buffers or consuming training RNG."""
+        ids = [case['target_id'] for case in self.cases]
+        with fixed_statistics(model), torch.no_grad(), self.autocast():
+            logits = model(self.test_images[ids]).float()
+        rows = []
+        for case, values in zip(self.cases, logits):
+            row = dict(case_key=case['key'], target_id=case['target_id'],
+                       true_label=case['true_label'], intended_label=case['intended_label'])
+            if torch.isfinite(values).all():
+                row.update(confidence_status='finite',
+                           **target_confidence(values, case['true_label'], case['intended_label']))
+            else:
+                row.update(confidence_status='nonfinite_logits', true_probability=None,
+                           intended_probability=None, true_log_probability=None,
+                           intended_log_probability=None, true_minus_intended_log_probability=None)
+            rows.append(row)
+        return rows
 
     def train_condition(self, name, seed, weight=None, case=None, delta=None):
         result_path = self.out/'runs'/(name+'.json')
@@ -104,6 +149,8 @@ class BilevelTrials(Comparison):
         history, totals, batches = [], torch.zeros(5, device=self.device), 0
         elapsed, peak = 0., 0
         last_finite_metrics = None
+        last_target_confidences = None
+        last_optimizer_observation = None
         if checkpoint_path.exists():
             # This pickle is created solely by this runner in our output directory;
             # Python/NumPy RNG states require weights_only=False. Never load uploads.
@@ -128,6 +175,10 @@ class BilevelTrials(Comparison):
 
         print(json.dumps(dict(event='condition_started', name=name, epoch=epoch, offset=offset,
                               lambda_weight=weight, parameter_count=sum(p.numel() for p in model.parameters()))), flush=True)
+        if getattr(self.config, 'log_target_confidences', False):
+            last_target_confidences = self.observe_targets(model)
+            print(json.dumps(dict(event='target_confidence', condition=name, epoch=epoch,
+                                  offset=offset, targets=last_target_confidences)), flush=True)
         try:
             while epoch < self.config.epochs:
                 model.train()
@@ -142,6 +193,8 @@ class BilevelTrials(Comparison):
                     randgen = torch.rand(len(idx), 4, device=self.device, generator=generators[1])
                     x = self.kettle.augment(x, randgen=randgen)
                     optimizer.zero_grad(set_to_none=True)
+                    diagnose_update = getattr(self.config, 'update_diagnostics', False) and (
+                        (epoch==0 and batches<32) or time.monotonic()-last_saved>self.config.checkpoint_seconds)
                     if weight is None:
                         loss = F.cross_entropy(model(x), y)
                         if not torch.isfinite(loss):
@@ -161,18 +214,28 @@ class BilevelTrials(Comparison):
                             gradient_diagnostics=diagnose_gradients)
                     if not all(p.grad is None or torch.isfinite(p.grad).all() for p in model.parameters()):
                         raise FloatingPointError('Nonfinite outer parameter gradient.')
+                    before = [p.detach().clone() for p in model.parameters()] if diagnose_update else None
                     optimizer.step()
                     if not all(torch.isfinite(p).all() for p in model.parameters()):
                         raise FloatingPointError('Nonfinite updated parameter.')
                     if getattr(self.config, 'validate_buffers', False) and not all(
                             torch.isfinite(buffer).all() for buffer in model.buffers()):
                         raise FloatingPointError('Nonfinite normalization buffer.')
+                    if diagnose_update:
+                        last_optimizer_observation = optimizer_observation(model, optimizer, before)
+                        del before
                     totals += torch.stack([metrics[k] for k in ('loss','classification','regularizer','inner_initial','inner_maximized')])*len(idx)
                     offset += len(idx)
                     batches += 1
                     progress = dict(phase='training', condition=name, epoch=epoch+1, epochs=self.config.epochs,
                         processed=offset, train_images=len(order), lambda_weight=weight,
                         metrics={k: float(v) for k, v in metrics.items()}, pid=os.getpid())
+                    if diagnose_update:
+                        progress['optimizer_diagnostics'] = last_optimizer_observation
+                    if getattr(self.config, 'log_target_confidences', False) and (
+                            (epoch==0 and batches<=32) or diagnose_update):
+                        last_target_confidences = self.observe_targets(model)
+                        progress['target_confidences'] = last_target_confidences
                     last_finite_metrics = progress['metrics']
                     write_json(self.out/'status.json', progress)
                     if getattr(self.config, 'gradient_diagnostics', False) and epoch==0 and batches<=32:
@@ -189,6 +252,9 @@ class BilevelTrials(Comparison):
                 row = dict(epoch=epoch, **{k: float(v/len(order)) for k,v in zip(
                     ('loss','classification','regularizer','inner_initial','inner_maximized'), totals)},
                     lr=optimizer.param_groups[0]['lr'])
+                if getattr(self.config, 'log_target_confidences', False):
+                    last_target_confidences = self.observe_targets(model)
+                    row['target_confidences'] = last_target_confidences
                 history.append(row)
                 print(json.dumps(dict(event='epoch', condition=name, **row)), flush=True)
                 order, offset, totals, batches = None, 0, torch.zeros(5, device=self.device), 0
@@ -220,6 +286,17 @@ class BilevelTrials(Comparison):
                 error=str(error), history=history,
                 last_finite_metrics=last_finite_metrics,
                 interpretation='Failed optimization; never count this as a prevented attack or silently alter lambda.')
+            if getattr(self.config, 'log_target_confidences', False):
+                result['last_observed_target_confidences'] = last_target_confidences
+                result['final_confidence_available'] = False
+            if getattr(self.config, 'save_failure_checkpoint', False):
+                failure_path = self.out/'failures'/(name+'.pt')
+                save_checkpoint(failure_path, dict(model=model.state_dict(), optimizer=optimizer.state_dict(),
+                    scheduler=scheduler.state_dict(), epoch=epoch, offset=offset, order=order,
+                    rng=capture_rng(generators), last_finite_metrics=last_finite_metrics,
+                    last_optimizer_observation=last_optimizer_observation,
+                    last_target_confidences=last_target_confidences, error=str(error)))
+                result['failure_checkpoint'] = str(failure_path)
             write_json(result_path, result)
             print(json.dumps(dict(event='condition_failed', **result)), flush=True)
             return result

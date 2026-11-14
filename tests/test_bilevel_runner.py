@@ -47,9 +47,12 @@ class RunnerTests(unittest.TestCase):
             instance.out, instance.device = Path(root), torch.device('cpu')
             instance.model_name, instance.images, instance.labels = 'toy', x.clone(), y.clone()
             instance.dm, instance.ds = 0., 1.
+            instance.cases = [dict(key=7, target_id=0, true_label=0, intended_label=1)]
+            instance.test_images = x.clone()
             instance.config = SimpleNamespace(epochs=2, batch_size=4, radius=16., inner_steps=1,
                 gradient_chunk_size=2, inner_step_size=16., checkpoint_seconds=100000., eps=16.,
-                regularizer_samples=2)
+                regularizer_samples=2, precision='fp32', log_target_confidences=True,
+                update_diagnostics=True)
             instance.args = SimpleNamespace(dataset='CIFAR10', epochs=2, noaugment=False,
                 data_aug='default', optimization='conservative')
             # Exercise common augmentation RNG restoration, not just model state.
