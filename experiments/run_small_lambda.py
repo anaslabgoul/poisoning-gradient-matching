@@ -1,4 +1,4 @@
-"""Two fixed tiny lambdas; reuse the original poison and completed baseline."""
+"""Explicitly requested fixed-lambda batches using the saved poison and baseline."""
 import argparse
 import copy
 from datetime import datetime
@@ -36,6 +36,23 @@ def verify_inputs(protocol,source):
     return manifest,baseline
 
 
+def validate_protocol(protocol):
+    allowed=([1e-8,1e-10],[1e-7,1e-6,1e-5])
+    count=len(protocol['lambdas'])
+    if (protocol['lambdas'] not in allowed or protocol['trial_count']!=1 or
+        protocol['new_victim_trainings']!=count or protocol['victim_models']!=count+1 or
+        protocol['reused_undefended_models']!=1 or protocol['additional_clean_surrogates']!=0 or
+        protocol['dataset']!='CIFAR10' or protocol['model']!='ResNet18' or
+        protocol['train_images']!=50000 or protocol['test_images']!=10000 or
+        protocol['epochs']!=40 or protocol['batch_size']!=128 or
+        protocol['case_keys']!=[3800000000] or protocol['victim_seeds']!=[18001] or
+        protocol['defense']['radius_pixel_units']!=16. or protocol['defense']['inner_steps']!=3 or
+        protocol['defense']['regularizer_samples_per_batch']!=8 or
+        protocol['optimizer']!=dict(learning_rate=.1,momentum=.9,nesterov=True,
+            weight_decay=.0005,clipping=False,warmup=False,adaptive_lambda=False,update_rescaling=False)):
+        raise ValueError('Require an explicitly requested lambda batch and the unchanged one-case benchmark.')
+
+
 class SmallLambdaTrials(BilevelTrials):
     def __init__(self,config,protocol,slice_seconds,source,baseline):
         self.source=source
@@ -63,22 +80,20 @@ class SmallLambdaTrials(BilevelTrials):
             self.summarize_trials()
         final=self.summarize_trials()
         write_json(self.out/'status.json',dict(phase='complete' if final['all_succeeded'] else 'complete_with_failures',
-            attempted=final['attempted'],expected=3,new_defended_trainings=2,cached_baselines=1))
+            attempted=final['attempted'],expected=self.protocol['victim_models'],
+            new_defended_trainings=self.protocol['new_victim_trainings'],cached_baselines=1))
 
 
-def main():
+def main(default_protocol='experiments/protocols/bilevel-small-lambda.json',
+         default_output='artifacts/bilevel-small-lambda'):
     parser=argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('--protocol',default='experiments/protocols/bilevel-small-lambda.json')
-    parser.add_argument('--output',default='artifacts/bilevel-small-lambda')
+    parser.add_argument('--protocol',default=default_protocol)
+    parser.add_argument('--output',default=default_output)
     parser.add_argument('--data',default='~/data')
     parser.add_argument('--slice-seconds',type=float,default=6000.)
     args=parser.parse_args()
     protocol=json.loads(Path(args.protocol).read_text())
-    if (protocol['lambdas']!=[1e-8,1e-10] or protocol['trial_count']!=1 or
-        protocol['new_victim_trainings']!=2 or protocol['optimizer']!=dict(learning_rate=.1,
-            momentum=.9,nesterov=True,weight_decay=.0005,clipping=False,warmup=False,
-            adaptive_lambda=False,update_rescaling=False)):
-        raise ValueError('Only the two requested fixed lambdas with the unchanged optimizer are authorized.')
+    validate_protocol(protocol)
     root=Path(args.output)
     hard_stop=datetime.fromisoformat(protocol['hard_stop_utc']).timestamp()
     if time.time()>=hard_stop-180:
